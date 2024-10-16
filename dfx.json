@@ -1,12 +1,16 @@
 {
   "canisters": {
-    "IcpBusinessCard_backend": {
+    "internet_identity": {
+      "type": "pull",
+      "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+    },
+    "backend": {
       "main": "src/IcpBusinessCard_backend/main.mo",
       "type": "motoko"
     },
-    "IcpBusinessCard_frontend": {
+    "frontend": {
       "dependencies": [
-        "IcpBusinessCard_backend"
+        "backend"
       ],
       "source": [
         "src/IcpBusinessCard_frontend/dist"
@@ -18,7 +22,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
   "output_env_file": ".env",
