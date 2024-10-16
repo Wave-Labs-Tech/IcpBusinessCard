@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "IcpBusinessCard_backend": {
+      "main": "src/IcpBusinessCard_backend/main.mo",
+      "type": "motoko"
+    },
+    "IcpBusinessCard_frontend": {
+      "dependencies": [
+        "IcpBusinessCard_backend"
+      ],
+      "source": [
+        "src/IcpBusinessCard_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "IcpBusinessCard_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
