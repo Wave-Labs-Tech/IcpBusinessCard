@@ -168,8 +168,7 @@ actor {
                         };
                         #Ok(data)
                     }
-                }  
-                
+                }       
             }
         } 
     };
@@ -234,7 +233,7 @@ actor {
   
   ///////////////////////////// Interaction functions between cards ///////////////////////////
     
-    public shared ({ caller }) func sharedCard(p: Principal):async  {#Ok; #Err: Text} {
+    public shared ({ caller }) func shareCard(p: Principal):async  {#Ok; #Err: Text} {
         let callerCard = Map.get<Principal, Card>(cards, phash, caller);
         switch callerCard {
             case null { #Err("The caller does not have a card") };
@@ -252,10 +251,8 @@ actor {
                             ignore Set.remove<Principal>(callerCard.contactRequests, phash, p);   
                         } else {
                             ignore Set.put<Principal>(pCard.contactRequests, phash, caller);
-
                         };
                         return #Ok;     
-
                     }
                 }
             }
