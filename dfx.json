@@ -2,20 +2,29 @@
   "canisters": {
     "internet_identity": {
       "type": "pull",
-      "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+      "id": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+      "declarations": {
+        "output": "src/declarations/internet_identity"
+      }
     },
     "backend": {
       "main": "src/backend/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "declarations": {
+        "output": "src/declarations/backend"
+      }
     },
     "frontend": {
       "dependencies": [
         "backend"
       ],
       "source": [
-        "src/frontend/dist"
+        "src/frontend/build"
       ],
-      "type": "assets"
+      "type": "assets",
+      "declarations": {
+        "output": "src/declarations/fronted"
+      }
     }
   },
   "defaults": {
