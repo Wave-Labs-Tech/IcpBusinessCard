@@ -7,6 +7,7 @@ module {
         name: Text;
         email: Text;
         phone: Nat;
+        photo: Blob;
         profession: Text;
         skils: [Text];
         positions: [{company: CompanyId; possition: Text}]; 
@@ -53,6 +54,8 @@ module {
 
     public type CompaniInit = {
         phone: Nat;
+        logo: Blob;
+        photoCeo: Blob;
         foundedYear: Nat;
         name: Text;
         location: Text;
