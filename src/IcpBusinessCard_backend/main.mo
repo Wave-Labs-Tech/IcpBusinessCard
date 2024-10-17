@@ -6,7 +6,7 @@ import { phash; nhash} "mo:map/Map";
 import Principal "mo:base/Principal";
 
 actor {
-
+  ////////////////////////////// Types declarations ///////////////////////////////////////////
     type CompanyInit = Types.CompaniInit;
     type Company = Types.Company;
     type CompanyId = Nat;
@@ -16,17 +16,17 @@ actor {
     type CompleteCardData = Types.CompleteCardData;
     type UpdatableData = Types.UpdatableData;
     type Id = Nat;
-    type CreateResult = {
-        #Ok: Id;
-        #Err: Text;
-    };
+    type CreateResult = { #Ok: Id; #Err: Text };
 
+  //////////////////////////// storage and utility variables //////////////////////////////////
+  
     stable let companiesId = Map.new<Principal, CompanyId>();
     stable let companies = Map.new<CompanyId, Company>();
     stable let cards = Map.new<Principal, Card>();
     stable var lastCompanyId = 0;
     stable var updateLockTime: Int = 43_200_000_000_000; // 12 horas en nanosegundos; 
-
+  
+  /////////////////////////////// Private Functions ///////////////////////////////////////////
     func isCompany(p: Principal): Bool {
         switch(Map.get<Principal, CompanyId>(companiesId, phash, p)){
             case null { false };
@@ -39,28 +39,6 @@ actor {
             case null { false };
             case (_) { true };
         }
-    };
-
-    public shared ({ caller }) func setUpdateLockTime(seg: Int):async Int{
-        assert(Principal.isController(caller));
-        updateLockTime := seg * 1000000000;
-        updateLockTime
-    };
-
-    public shared ({ caller }) func createCompany(init: CompanyInit):async CreateResult {
-        if(Principal.isAnonymous(caller)){ return #Err("Caller anonymous")};
-        if(isCompany(caller)){ return #Err("The caller already has a company associated")};
-        lastCompanyId += 1;
-        ignore Map.put<Principal, CompanyId>(companiesId, phash, caller, lastCompanyId);
-        let newCompany = {
-            init with
-            owner = caller;
-            verified = false;
-            companyEmployees = 0;
-            scoring = 0;
-        };
-        ignore Map.put<CompanyId, Company>(companies, nhash, lastCompanyId, newCompany);
-        #Ok(lastCompanyId)
     };
 
     func safeCreateCard(init: CardDataInit, owner: Principal, creator: Principal): {#Ok: CardPublicData; #Err: Text} {
@@ -84,6 +62,30 @@ actor {
         #Ok(publicData);
     };
 
+  ///////////////////////////// Create elements and setters funcions //////////////////////////
+
+    public shared ({ caller }) func setUpdateLockTime(seg: Int):async Int{
+        assert(Principal.isController(caller));
+        updateLockTime := seg * 1000000000;
+        updateLockTime
+    };
+
+    public shared ({ caller }) func createCompany(init: CompanyInit):async CreateResult {
+        if(Principal.isAnonymous(caller)){ return #Err("Caller anonymous")};
+        if(isCompany(caller)){ return #Err("The caller already has a company associated")};
+        lastCompanyId += 1;
+        ignore Map.put<Principal, CompanyId>(companiesId, phash, caller, lastCompanyId);
+        let newCompany = {
+            init with
+            owner = caller;
+            verified = false;
+            companyEmployees = 0;
+            scoring = 0;
+        };
+        ignore Map.put<CompanyId, Company>(companies, nhash, lastCompanyId, newCompany);
+        #Ok(lastCompanyId)
+    };
+
     public shared ({ caller }) func createCard(init: CardDataInit): async {#Ok: CardPublicData; #Err: Text} {
         assert(not Principal.isAnonymous(caller));
         safeCreateCard(init, caller, caller);
@@ -102,6 +104,30 @@ actor {
         }
     };
 
+    public shared ({ caller }) func updateCard(data: UpdatableData): async {#Ok: CardPublicData; #Err: Text} {
+        let card = Map.get<Principal, Card>(cards,phash, caller);
+        switch card {
+            case null {#Err("There is no card associated with the caller")};
+            case(?card) {
+                if(now() < card.lastModifiedDate + updateLockTime){
+                    return #Err("The last update was very recent, you must wait");
+                };
+                let updateCard: Card = {
+                    card with
+                    data;
+                    lastModifiedDate = now()
+                };
+                ignore Map.put<Principal, Card>(cards, phash, caller, updateCard);
+                let publicDataCard: CardPublicData = {
+                    updateCard with 
+                    contactQty = card.contacts.size();
+                };
+                #Ok(publicDataCard)
+            }
+        }
+    };
+
+  ///////////////////////////////////////// Getters ///////////////////////////////////////////
     public query func getPublicDataCard(p: Principal): async {#Ok: CardPublicData; #Err: Text} {
         let card = Map.get<Principal, Card>(cards, phash, p);
         switch card {
@@ -155,28 +181,27 @@ actor {
         }
     };
 
-    public shared ({ caller }) func updateCard(data: UpdatableData): async {#Ok: CardPublicData; #Err: Text} {
-        let card = Map.get<Principal, Card>(cards,phash, caller);
+    public shared ({ caller }) func getContactRequests():async {#Ok: [Principal]; #Err: Text}{
+        let card = Map.get<Principal, Card>(cards, phash, caller);
         switch card {
-            case null {#Err("There is no card associated with the caller")};
-            case(?card) {
-                if(now() < card.lastModifiedDate + updateLockTime){
-                    return #Err("The last update was very recent, you must wait");
-                };
-                let updateCard: Card = {
-                    card with
-                    data;
-                    lastModifiedDate = now()
-                };
-                ignore Map.put<Principal, Card>(cards, phash, caller, updateCard);
-                let publicDataCard: CardPublicData = {
-                    updateCard with 
-                    contactQty = card.contacts.size();
-                };
-                #Ok(publicDataCard)
+            case null { #Err("There is no card associated with the caller")};
+            case (?card){
+                #Ok(Set.toArray<Principal>(card.contactRequests));
             }
         }
     };
+
+    public shared ({ caller }) func getMyContacts(): async [Principal] {
+        let card = Map.get<Principal, Card>(cards, phash, caller);
+        switch card {
+            case null { [] };
+            case (?card){
+                Set.toArray<Principal>(card.contacts);
+            }
+        }
+    };
+  
+  ///////////////////////////// Interaction functions between cards ///////////////////////////
     
     public shared ({ caller }) func sharedCard(p: Principal):async  {#Ok; #Err: Text} {
         let callerCard = Map.get<Principal, Card>(cards, phash, caller);
@@ -206,24 +231,6 @@ actor {
         }
     };
 
-    public shared ({ caller }) func getContactRequests():async {#Ok: [Principal]; #Err: Text}{
-        let card = Map.get<Principal, Card>(cards, phash, caller);
-        switch card {
-            case null { #Err("There is no card associated with the caller")};
-            case (?card){
-                #Ok(Set.toArray<Principal>(card.contactRequests));
-            }
-        }
-    };
 
-    public shared ({ caller }) func getMyContacts(): async [Principal] {
-        let card = Map.get<Principal, Card>(cards, phash, caller);
-        switch card {
-            case null { [] };
-            case (?card){
-                Set.toArray<Principal>(card.contacts);
-            }
-        }
-    };
 
 };
