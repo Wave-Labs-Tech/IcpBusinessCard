@@ -4,6 +4,7 @@ import Set "mo:map/Set";
 import { now } "mo:base/Time";
 import { phash; nhash} "mo:map/Map";
 import Principal "mo:base/Principal";
+import Buffer "mo:base/Buffer";
 
 actor {
   ////////////////////////////// Types declarations ///////////////////////////////////////////
@@ -17,12 +18,18 @@ actor {
     type UpdatableData = Types.UpdatableData;
     type Id = Nat;
     type CreateResult = { #Ok: Id; #Err: Text };
+    type GetPublicCardsResult = {
+        #Ok: {cardsPreview: [CardPreview]; thereIsMore: Bool};
+        #Err: Text;
+    };
+    type CardPreview = Types.CardPreview;
 
   //////////////////////////// storage and utility variables //////////////////////////////////
-  
+
     stable let companiesId = Map.new<Principal, CompanyId>();
     stable let companies = Map.new<CompanyId, Company>();
     stable let cards = Map.new<Principal, Card>();
+    stable let publicCards = Set.new<Principal>();
     stable var lastCompanyId = 0;
     stable var updateLockTime: Int = 43_200_000_000_000; // 12 horas en nanosegundos; 
   
@@ -54,9 +61,8 @@ actor {
             rewiews: [Text] = [];
         };
         ignore Map.put<Principal, Card>(cards, phash, owner, newCard);
-        let publicData: CardPublicData = { init with
-            score = 0;
-            rewiews: [Text] = [];
+        ignore Set.put<Principal>(publicCards, phash, owner);
+        let publicData: CardPublicData = { newCard with
             contactQty = 0;
         };
         #Ok(publicData);
@@ -168,7 +174,7 @@ actor {
         } 
     };
 
-    public shared ({ caller }) func getMyCard(): async ?CompleteCardData {
+    public shared query({ caller }) func getMyCard(): async ?CompleteCardData {
         let card = Map.get<Principal, Card>(cards, phash, caller);
         switch card {
             case null { null };
@@ -181,7 +187,7 @@ actor {
         }
     };
 
-    public shared ({ caller }) func getContactRequests():async {#Ok: [Principal]; #Err: Text}{
+    public shared query ({ caller }) func getContactRequests():async {#Ok: [Principal]; #Err: Text}{
         let card = Map.get<Principal, Card>(cards, phash, caller);
         switch card {
             case null { #Err("There is no card associated with the caller")};
@@ -191,7 +197,7 @@ actor {
         }
     };
 
-    public shared ({ caller }) func getMyContacts(): async [Principal] {
+    public shared query ({ caller }) func getMyContacts(): async [Principal] {
         let card = Map.get<Principal, Card>(cards, phash, caller);
         switch card {
             case null { [] };
@@ -199,6 +205,31 @@ actor {
                 Set.toArray<Principal>(card.contacts);
             }
         }
+    };
+
+    public query func getPaginatePublicCards(page: Nat): async GetPublicCardsResult{
+        if(Set.size<Principal>(publicCards) < page * 10){
+            return #Err("Pagination index out of range")
+        };
+        let arrayCardsOwners = Set.toArray<Principal>(publicCards);
+        let bufferPreviewCards = Buffer.fromArray<CardPreview>([]);
+        var index = page * 10;
+        while (index < arrayCardsOwners.size() and index < (page + 1) * 10){
+            let card = Map.get<Principal, Card>(cards, phash, arrayCardsOwners[index]);
+            switch card {
+                case null {};
+                case (?card) {
+                    let currentCardPreview: CardPreview = {
+                        card with
+                        contactQty = card.contacts.size();
+                    };
+                    bufferPreviewCards.add(currentCardPreview);
+                }
+            };
+            index += 1;
+        };
+        let thereIsMore = arrayCardsOwners.size() > (page + 1) * 10;
+        #Ok({cardsPreview = Buffer.toArray<CardPreview>(bufferPreviewCards); thereIsMore}) 
     };
   
   ///////////////////////////// Interaction functions between cards ///////////////////////////

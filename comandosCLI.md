@@ -4,6 +4,8 @@ create Card
 dfx canister call backend createCard '( record {
     name = "Ariel";
     email = "arielrobotti@gmail.com";
+    photo = blob "00/11/22/33/44/55/66/77/88/99";
+    photoPreview = blob "00/11/22/33/44";
     phone = 54223687945;
     profession = "Motoko Dev";
     skils = vec {"Backend"; "Motoko"; "software architecture"};
@@ -17,6 +19,10 @@ create Company
 dfx canister call backend createCompany '( record {
     phone = 542235478987;
     foundedYear = 1998;
+    logo = blob "00/11/22/33/44/55/66/77/88/99";
+    photoCeo = blob "00/11/22/33/44/55/66/77/88/99";
+    thumbnailLogo = blob "00/11/22/33/44";
+    thumbnailPhotoCeo = blob "00/11/22/33/44";
     name = "Alfajores Habana";
     location = "Mar Del Plata";
     website = opt "www.habana.com";
@@ -33,6 +39,8 @@ create card for
 dfx canister call backend createCardFor '( record {
     name = "Empleado1";
     email = "empleado1@gmail.com";
+    photo = blob "00/11/22/33/44/55/66/77/88/99";
+    photoPreview = blob "00/11/22/33/44";
     phone = 5422662313;
     profession = "Panadero";
     skils = vec {"Panificados"; "Manipulacion de alimentos"};

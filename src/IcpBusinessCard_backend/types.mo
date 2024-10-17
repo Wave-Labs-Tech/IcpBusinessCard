@@ -7,7 +7,8 @@ module {
         name: Text;
         email: Text;
         phone: Nat;
-        photo: Blob;
+        photo: Blob; //Foto original hasta 1.5 MB 
+        photoPreview: Blob; //Foto reducida para previsualización < 64Kb
         profession: Text;
         skils: [Text];
         positions: [{company: CompanyId; possition: Text}]; 
@@ -23,9 +24,18 @@ module {
         rewiews: [Text];
         // historyLog: [Event];
 
-    };
+    };    
+    
+    // public type Event = {
+    //     date: Int;
+    //     title: Text;
+    //     description: Text;   
+    // };
+
     public type CardPublicData = {
+        owner: Principal;
         name: Text;
+        photo: Blob;
         profession: Text;
         skils: [Text];
         positions: [{company: CompanyId; possition: Text}];
@@ -36,7 +46,15 @@ module {
     public type CompleteCardData = CardPublicData and {
         email: Text;
         phone: Nat;
+    };
 
+    public type CardPreview = {
+        owner: Principal;
+        name: Text;
+        photoPreview: Blob; //Foto reducida para previsualización < 64Kb
+        profession: Text;
+        skils: [Text];
+        positions: [{company: CompanyId; possition: Text}];
     };
 
     public type UpdatableData = {
@@ -45,17 +63,13 @@ module {
         porfession: Text;
         skils: [Text];
     };
-    
-    // public type Event = {
-    //     date: Int;
-    //     title: Text;
-    //     description: Text;   
-    // };
 
     public type CompaniInit = {
         phone: Nat;
         logo: Blob;
         photoCeo: Blob;
+        thumbnailLogo: Blob;
+        thumbnailPhotoCeo: Blob;
         foundedYear: Nat;
         name: Text;
         location: Text;
