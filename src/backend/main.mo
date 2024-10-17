@@ -62,6 +62,9 @@ actor {
         };
         ignore Map.put<Principal, Card>(cards, phash, owner, newCard);
         ignore Set.put<Principal>(publicCards, phash, owner);
+        if(owner != creator){
+            ignore Set.put<Principal>(newCard.contactRequests, phash, creator);
+        };
         let publicData: CardPublicData = { newCard with
             contactQty = 0;
         };
@@ -104,7 +107,7 @@ actor {
                 #Err("Caller cannot create cards for third parties")
             };
             case (?_company) {
-                //TODO sumar unempleado a la compañia
+                //TODO sumar un empleado a la compañia
                 safeCreateCard(init, owner, caller);
             }
         }
