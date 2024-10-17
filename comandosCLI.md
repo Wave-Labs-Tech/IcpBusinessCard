@@ -47,6 +47,7 @@ dfx canister call backend createCardFor '( record {
     positions = vec {record {company = 1; possition = "Supervisor"}};
     }, principal "ymgon-r53wh-becic-fsvsr-uajvf-5cpzw-pfk5m-phy5p-n5vhe-ihoz6-gqe"
 )'
+```
 
 mushroom:   ymgon-r53wh-becic-fsvsr-uajvf-5cpzw-pfk5m-phy5p-n5vhe-ihoz6-gqe
 flic:       qcirp-tviue-bxtvo-bniam-zfaku-5yy25-h2dwp-cex5m-ojvxu-5b4zd-fae
