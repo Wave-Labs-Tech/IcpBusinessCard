@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import * as backend from "../../../.dfx/local/canisters/backend"
+import * as backend from "./declarations/backend"
 import { createClient } from "@connect2ic/core"
 import { InternetIdentity, PlugWallet, NFID } from "@connect2ic/core/providers"
 import { Connect2ICProvider, useConnect } from "@connect2ic/react"
