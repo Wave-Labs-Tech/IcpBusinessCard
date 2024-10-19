@@ -137,6 +137,9 @@ actor {
     };
 
   ///////////////////////////////////////// Getters ///////////////////////////////////////////
+    public query ({ caller }) func whoAmI(): async Text{
+        Principal.toText(caller);
+    };
     public query func getPublicDataCard(p: Principal): async {#Ok: CardPublicData; #Err: Text} {
         let card = Map.get<Principal, Card>(cards, phash, p);
         switch card {
