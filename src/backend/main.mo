@@ -129,7 +129,7 @@ actor {
                 ignore Map.put<Principal, Card>(cards, phash, caller, updateCard);
                 let publicDataCard: CardPublicData = {
                     updateCard with 
-                    contactQty = card.contacts.size();
+                    contactQty = Set.size(card.contacts);
                 };
                 #Ok(publicDataCard)
             }
@@ -141,49 +141,40 @@ actor {
     public query ({ caller }) func whoAmI(): async Text{
         Principal.toText(caller);
     };
-    
-  ///// Integrar estas dos funciones en una sola y devolver los datos publicos o todos dependiendo del caller ////
 
-    public query func getPublicDataCard(p: Principal): async {#Ok: CardPublicData; #Err: Text} {
-        let card = Map.get<Principal, Card>(cards, phash, p);
-        switch card {
-            case null { #Err("There is no card associated with the principal provided")};
-            case(?card) {
-                let dataPublic: CardPublicData = {
-                    card with
-                    contactQty = card.contacts.size();
-                };
-                #Ok(dataPublic)
-            }
-        }
-    };
-
-    public query ({ caller }) func getCompleteDataCard(p: Principal):async  {#Ok: CompleteCardData; #Err: Text} {
+    public query ({ caller }) func getCardByPrincipal(p: Principal): async {#Ok: CompleteCardData; #Err: Text} {
         let pCard = Map.get<Principal, Card>(cards, phash, p);
         switch pCard {
             case null {#Err("There is no card associated with the principal provided")};
-            case(?pCard){
+            case(?pCard) {
                 let callerCard = Map.get<Principal, Card>(cards, phash, caller);
                 switch callerCard {
-                    case null {#Err("There is no card associated with the caller")};
+                    case null {#Ok({ pCard with
+                            contactQty = Set.size(pCard.contacts);
+                            email = "***********************";
+                            phone = 0;
+                        })
+                    };
                     case (?callerCard){
                         if(not Set.has<Principal>(pCard.contacts, phash, caller) and
                             not Set.has<Principal>(callerCard.contactRequests, phash, p) and
                             caller != p) { 
-                            return #Err("Access denied");
+                            return #Ok({ pCard with
+                                contactQty = Set.size(pCard.contacts);
+                                email = "***********************";
+                                phone = 0;
+                            });
                         };
-                        let data: CompleteCardData = {
+                        #Ok({
                             pCard with
-                            contactQty = pCard.contacts.size();
-                        };
-                        #Ok(data)
+                            contactQty = Set.size(pCard.contacts);
+                        })
                     }
-                }       
+                } 
             }
-        } 
-    };
+        }
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+    };
 
     public shared query({ caller }) func getMyCard(): async ?CompleteCardData {
         let card = Map.get<Principal, Card>(cards, phash, caller);
@@ -192,7 +183,7 @@ actor {
             case (?card){
                 ?{
                     card with 
-                    contactQty = card.contacts.size();
+                    contactQty = Set.size(card.contacts);
                 };
             }
         }
@@ -232,7 +223,7 @@ actor {
                 case (?card) {
                     let currentCardPreview: CardPreview = {
                         card with
-                        contactQty = card.contacts.size();
+                        contactQty = Set.size(card.contacts);
                     };
                     bufferPreviewCards.add(currentCardPreview);
                 }

@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import LoginButton from './components/auth/LoginButton';
 import LogoutButton from './components/auth/LogoutButton';
