@@ -24,6 +24,10 @@ function App() {
       host: "http://localhost:4943",
     },
   });
+  if(isAuthenticated){
+    console.log(backend.getPaginatePublicCards(BigInt(0)));
+    console.log(backend.whoAmI());
+  };
 
   return (
     <div className="App">
