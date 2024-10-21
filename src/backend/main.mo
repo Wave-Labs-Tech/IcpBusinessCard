@@ -141,6 +141,8 @@ actor {
     public query ({ caller }) func whoAmI(): async Text{
         Principal.toText(caller);
     };
+    
+  ///// Integrar estas dos funciones en una sola y devolver los datos publicos o todos dependiendo del caller ////
 
     public query func getPublicDataCard(p: Principal): async {#Ok: CardPublicData; #Err: Text} {
         let card = Map.get<Principal, Card>(cards, phash, p);
@@ -180,6 +182,8 @@ actor {
             }
         } 
     };
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 
     public shared query({ caller }) func getMyCard(): async ?CompleteCardData {
         let card = Map.get<Principal, Card>(cards, phash, caller);
