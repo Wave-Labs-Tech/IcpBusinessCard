@@ -1,57 +1,54 @@
-import { useState } from 'react';
-import * as backend from "./declarations/backend"
-import { createClient } from "@connect2ic/core"
-import { InternetIdentity, PlugWallet, NFID } from "@connect2ic/core/providers"
-import { Connect2ICProvider, useConnect } from "@connect2ic/react"
-import "@connect2ic/core/style.css"
 import React from 'react';
+import logo from './logo.svg';
+import './App.css';
+import LoginButton from './components/auth/LoginButton';
+import LogoutButton from './components/auth/LogoutButton';
+import { useContext, useEffect, useState } from 'react';
+import { AuthContext } from './context/AuthContext';
+import { createActor } from './declarations/backend';
+import { Principal } from "@dfinity/principal";
 
 function App() {
-    const { isConnected, principal, activeProvider  } = useConnect()
+  const { isAuthenticated, identity } = useContext(AuthContext);
   
-    return (
-      <>
-        
-        
-      </>
-    )
+
+  let canisterId:  string | undefined = process.env.REACT_APP_CANISTER_ID_BACKEND;
+
+  if (!canisterId) {
+    throw new Error("El canister ID no está definido.");
   }
 
-declare let process: {
-    env: {
-        DFX_NETWORK: string
-        NODE_ENV: string
-    }
+  let backend  = createActor(Principal.fromText(canisterId), {
+    agentOptions: {
+      identity: identity,
+      host: "http://localhost:4943",
+    },
+  });
+
+  return (
+    <div className="App">
+      <header className="App-header">
+      <div className="header-title">ICP Business Card</div>
+        {isAuthenticated ? <LogoutButton /> : <LoginButton />}
+      </header>
+      {isAuthenticated ? (
+        <div>
+          <div>User Principal ID: </div>
+          <div style={{fontSize: '0.8rem'}}>{identity.getPrincipal().toString()}</div>
+        </div>
+      ) : null}
+      <div className="additional-info">Frontend en desarrollo</div>
+      
+      <a
+        className="link"
+        href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jkmf4-caaaa-aaaal-amq3q-cai"
+        target="_blank" // Abre el enlace en una nueva pestaña
+        rel="noopener noreferrer" // Mejora la seguridad al abrir el enlace
+      >
+        Interfase candid del Backend
+      </a>
+    </div>
+  );
 }
 
-const network =
-    process.env.DFX_NETWORK ||
-    (process.env.NODE_ENV === "production" ? "ic" : "local")
-const internetIdentityUrl =
-    network === "local"
-        ? "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai"
-        : "https://identity.ic0.app"
-
-const client = createClient({
-    canisters: {
-        backend,
-    },
-    providers: [
-        new InternetIdentity({
-            dev: true,
-            providerUrl: internetIdentityUrl,
-        }),
-        // new PlugWallet(),
-        new NFID(),
-    ],
-    globalProviderConfig: {
-        // dev: import.meta.env.DEV,
-        dev: true,
-    },
-})
-
-export default () => (
-    <Connect2ICProvider client={client}>
-      <App />
-    </Connect2ICProvider>
-  )
+export default App;

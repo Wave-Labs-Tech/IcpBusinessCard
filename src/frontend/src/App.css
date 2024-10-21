@@ -1,0 +1,87 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  display: flex; /* Usar flexbox para la alineación */
+  justify-content: flex-end; /* Alinear elementos a la derecha */
+  align-items: center; /* Centrar verticalmente */
+  padding: 10px; /* Espacio interno alrededor */
+  background-color: #282c34; /* Color de fondo del encabezado */
+  min-height: 60px; /* Altura mínima del encabezado */
+  color: white; /* Color del texto */
+}
+
+.header-title {
+  color: rgb(226, 255, 193);
+  font-size: 2.5rem;
+  text-shadow: 3px 3px 6px #1cff14a9;
+  flex-grow: 1; /* Hacer que el título ocupe el espacio disponible */
+  text-align: center; /* Centrar el texto */
+}
+
+.additional-info {
+  margin-top: 100px; /* Espacio arriba del div */
+  font-size: 2rem; /* Tamaño de fuente del div */
+  text-align: center; /* Centra el texto */
+}
+
+.link {
+  display: block; /* Hace que el enlace ocupe toda la línea */
+  margin-top: 10px; /* Espacio arriba del enlace */
+  font-size: 2rem; /* Tamaño de fuente del enlace */
+  text-align: center; /* Centra el texto */
+  color: #007bff; /* Color del enlace */
+  text-decoration: none; /* Quita el subrayado */
+}
+
+.link:hover {
+  text-decoration: underline; /* Agrega subrayado al pasar el ratón */
+}
+
+
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Media query para dispositivos móviles */
+@media (max-width: 768px) { /* Cambia 768px si deseas un tamaño diferente */
+  .header-title {
+    font-size: 1.5rem; /* Tamaño de fuente más pequeño */
+  }
+
+  .App-header button {
+    font-size: 0.8rem; /* Tamaño de fuente del botón más pequeño */
+    padding: 5px 10px; /* Ajusta el padding para que se vea bien */
+  }
+
+  .additional-info {
+    font-size: 1.5rem; /* Tamaño de fuente más pequeño para información adicional */
+  }
+
+  .link {
+    font-size: 1.5rem; /* Tamaño de fuente más pequeño para el enlace */
+  }
+}
+
