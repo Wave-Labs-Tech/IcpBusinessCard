@@ -11,26 +11,32 @@ module {
         photoPreview: Blob; //Foto reducida para previsualización < 64Kb
         profession: Text;
         skils: [Text];
-        positions: [{company: CompanyId; possition: Text}]; 
+        visiblePositions: Bool;
+        positions: [Position];
+        links: [Text]
     };
 
     public type Card = CardDataInit and {
+        reentrancyStatus: Bool;
         owner: Principal;
         creator: Principal;
         lastModifiedDate: Int;
+        requestsEmployee: [Position];
         contacts: Set.Set<Principal>;
         contactRequests: Set.Set<Principal>;
         score: Nat;
         rewiews: [Text];
-        // historyLog: [Event];
+        historyLog: [EventId];
 
-    };    
+    };
+
+    public type EventId = Nat;
     
-    // public type Event = {
-    //     date: Int;
-    //     title: Text;
-    //     description: Text;   
-    // };
+    public type Event = {
+        date: Int;
+        title: Text;
+        description: Text;   
+    };
 
     public type CardPublicData = {
         owner: Principal;
@@ -38,12 +44,14 @@ module {
         photo: Blob;
         profession: Text;
         skils: [Text];
-        positions: [{company: CompanyId; possition: Text}];
+        positions: [Position];
         score: Nat;
         rewiews: [Text];
         contactQty: Nat;
+        links: [Text];
     };
     public type CompleteCardData = CardPublicData and {
+        requestsEmployee: [Position];
         email: Text;
         phone: Nat;
     };
@@ -54,7 +62,7 @@ module {
         photoPreview: Blob; //Foto reducida para previsualización < 64Kb
         profession: Text;
         skils: [Text];
-        positions: [{company: CompanyId; possition: Text}];
+        positions: [Position];
     };
 
     public type UpdatableData = {
@@ -86,7 +94,12 @@ module {
         verified: Bool;
         companyEmployees: Nat;
         scoring: Nat;
-    }
+    };
+     public type Position = {
+        startDate: Int;
+        company: CompanyId; 
+        position: Text
+    };
 
     
 }

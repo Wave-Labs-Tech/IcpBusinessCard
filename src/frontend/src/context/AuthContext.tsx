@@ -16,7 +16,23 @@ const defaultAuthContext: AuthContextProps = {
     logout: async () => { }
 };
 
+declare let process: {
+    env: {
+        REACT_APP_DFX_NETWORK: string
+    }
+}
+
+const network = process.env.REACT_APP_DFX_NETWORK || 'local';
+
+const internetIdentityUrl =
+    network === "local"
+        ? "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai"
+        : "https://identity.ic0.app"
+
 export const AuthContext = createContext<AuthContextProps>(defaultAuthContext);
+
+console.log("Network:", process.env.REACT_APP_DFX_NETWORK);
+console.log("InternetIdentity URL: ", internetIdentityUrl)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -42,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async () => {
         const authClient = await AuthClient.create();
         authClient.login({
-            identityProvider: process.env.REACT_APP_INTERNET_COMPUTER_PROVIDER,
+            identityProvider: internetIdentityUrl,
             onSuccess: () => {
                 setIdentity(authClient.getIdentity());
                 setIsAuthenticated(true);
@@ -59,8 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value= {{ isAuthenticated, identity, login, logout }}>
-            { children }
+        <AuthContext.Provider value={{ isAuthenticated, identity, login, logout }}>
+            {children}
         </AuthContext.Provider>
     );
 }

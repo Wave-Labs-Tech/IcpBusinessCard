@@ -3,6 +3,7 @@ import './App.css';
 import LoginButton from './components/auth/LoginButton';
 import LogoutButton from './components/auth/LogoutButton';
 import { useContext, useEffect, useState } from 'react';
+import { UserProfile } from './components/userProfile/UserProfile';
 import { AuthContext } from './context/AuthContext';
 import { createActor } from './declarations/backend';
 import { Principal } from "@dfinity/principal";
@@ -36,6 +37,7 @@ function App() {
       </header>
       {isAuthenticated ? (
         <div>
+          <UserProfile/>
           <div>User Principal ID: </div>
           <div style={{fontSize: '0.8rem'}}>{identity.getPrincipal().toString()}</div>
         </div>

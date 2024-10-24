@@ -5,12 +5,15 @@ import { now } "mo:base/Time";
 import { phash; nhash} "mo:map/Map";
 import Principal "mo:base/Principal";
 import Buffer "mo:base/Buffer";
+import Prim "mo:⛔";
 
 actor {
   ////////////////////////////// Types declarations ///////////////////////////////////////////
+  // Interactions
     type CompanyInit = Types.CompaniInit;
     type Company = Types.Company;
     type CompanyId = Nat;
+    type Position = Types.Position;
     type CardDataInit = Types.CardDataInit;
     type Card = Types.Card;
     type CardPublicData = Types.CardPublicData;
@@ -55,10 +58,13 @@ actor {
             owner;
             creator;
             lastModifiedDate = now();
+            reentrancyStatus = false;
             contacts = Set.new<Principal>();
             contactRequests= Set.new<Principal>();
+            requestsEmployee: [Position] = [];
             score = 0;
             rewiews: [Text] = [];
+            historyLog = []
         };
         ignore Map.put<Principal, Card>(cards, phash, owner, newCard);
         ignore Set.put<Principal>(publicCards, phash, owner);
@@ -100,6 +106,9 @@ actor {
         safeCreateCard(init, caller, caller);
     };
 
+
+  /////////////////////////// Funciones exclusivas de perfiles de Empresa //////////////////////
+
     public shared ({ caller }) func createCardFor(init: CardDataInit, owner: Principal): async {#Ok: CardPublicData; #Err: Text} {   
         let companId = Map.get<Principal, CompanyId>(companiesId, phash, caller);
         switch companId {
@@ -112,7 +121,93 @@ actor {
             }
         }
     };
+    
+    func reentrancyPrevent({cardPID: Principal; reentrancyStatus: Bool}) {
+        let card = Map.get<Principal, Card>(cards, phash, cardPID);
+        switch card {
+            case null { assert false };
+            case (?card) {
+                ignore Map.put<Principal, Card>(cards, phash, cardPID, { card with reentrancyStatus })
+            }
+        }
+    };
+  ////////////////////////////// Protocol for linking in a dependency relationship ////////////////////////////////////////////
+    public shared ({ caller }) func employUserExisting({employPrincipalId: Principal; position: Position}): async {#Ok: CardPublicData; #Err: Text} {
+        let companyID = Map.get<Principal, CompanyId>(companiesId, phash, caller);
+        switch companyID {
+            case null { return #Err("There is no company associated with the caller")};
+            case (?id) {
+                let company = Map.get<CompanyId, Company>(companies, nhash, id); 
+                switch company {
+                    case null { return #Err("There is no company associated with the caller") };
+                    case ( company ) {
+                        let cardEmploy = Map.get<Principal, Card>(cards, phash, employPrincipalId);
+                        switch cardEmploy {
+                            case null {return #Err("There is no Card associated with the principal provided") };
+                            case ( ?cardEmploy ) {
+                                if (cardEmploy.reentrancyStatus){ return #Err("Reentry process activated, please try again later")};
+                                reentrancyPrevent({cardPID = employPrincipalId; reentrancyStatus = true});
+                                let updateRequestsEmployee = Prim.Array_tabulate<Position>(
+                                    cardEmploy.requestsEmployee.size() + 1,
+                                    func i = if(i == 0 ) { {position with startDate = now()} } else {cardEmploy.requestsEmployee[i - 1]}
+                                );
+                                ignore Map.put<Principal, Card>(
+                                    cards, 
+                                    phash, 
+                                    employPrincipalId,
+                                    { cardEmploy with requestsEmployee = updateRequestsEmployee } 
+                                );
+                                let publicData: CardPublicData = { 
+                                    cardEmploy with 
+                                    positions = if(cardEmploy.visiblePositions){cardEmploy.positions} else {[]};
+                                    contactQty = Set.size(cardEmploy.contacts);
+                                };
+                                reentrancyPrevent({cardPID = employPrincipalId; reentrancyStatus = false});
+                                #Ok(publicData)
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    };
 
+    public shared ({ caller }) func acceptEmployment(indexRequest: Nat): async {#Ok: [Position]; #Err: Text} {
+        let card = Map.get<Principal, Card>(cards, phash, caller);
+        switch card {
+            case null {#Err("There is no card associated with the caller")};
+            case (?card) {
+                if (card.reentrancyStatus){ return #Err("Reentry process activated, please try again later")};
+                reentrancyPrevent({cardPID = caller; reentrancyStatus = true});
+                let bufferPositions = Buffer.fromArray<Position>(card.positions);
+                let bufferRequestsEmployee = Buffer.fromArray<Position>([]);
+                if(indexRequest > card.requestsEmployee.size()){return #Err("indexRequest out of range")};
+
+                var i = 0;
+                while (i < card.requestsEmployee.size()) {
+                    if (i != indexRequest){
+                        bufferRequestsEmployee.add(card.requestsEmployee[i]);
+                    } else {
+                        bufferPositions.add(card.requestsEmployee[i]);
+                        i += 1;
+                    };
+                    i += 1;
+                };
+                let requestsEmployee = Buffer.toArray(bufferRequestsEmployee);
+                ignore Map.put<Principal, Card>(
+                    cards, 
+                    phash, 
+                    caller, 
+                    {card with 
+                        positions = Buffer.toArray(bufferPositions);
+                        requestsEmployee});
+                reentrancyPrevent({cardPID = caller; reentrancyStatus = false});
+                #Ok(requestsEmployee);
+            };
+        };
+    };
+
+  ///////////////////////////////////// Update Functions //////////////////////////////////////////////////////////
     public shared ({ caller }) func updateCard(data: UpdatableData): async {#Ok: CardPublicData; #Err: Text} {
         let card = Map.get<Principal, Card>(cards,phash, caller);
         switch card {
@@ -129,9 +224,21 @@ actor {
                 ignore Map.put<Principal, Card>(cards, phash, caller, updateCard);
                 let publicDataCard: CardPublicData = {
                     updateCard with 
+                    positions = if(card.visiblePositions) {card.positions} else {[]};
                     contactQty = Set.size(card.contacts);
                 };
                 #Ok(publicDataCard)
+            }
+        }
+    };
+
+    public shared ({ caller }) func setPositionVisibility(visiblePositions: Bool):async  Bool {
+        let card = Map.get<Principal, Card>(cards, phash, caller);
+        switch card {
+            case null { false };
+            case (?card) {
+                ignore Map.put<Principal, Card>(cards, phash, caller, {card with visiblePositions});
+                true
             }
         }
     };
@@ -168,23 +275,23 @@ actor {
                         #Ok({
                             pCard with
                             contactQty = Set.size(pCard.contacts);
+                            positions = if(pCard.visiblePositions) {pCard.positions} else {[]};
                         })
                     }
                 } 
             }
         }
-
     };
 
-    public shared query({ caller }) func getMyCard(): async ?CompleteCardData {
+    public shared query({ caller }) func getMyCard(): async {#Ok: CompleteCardData; #Err} {
         let card = Map.get<Principal, Card>(cards, phash, caller);
         switch card {
-            case null { null };
+            case null { #Err };
             case (?card){
-                ?{
+                #Ok({
                     card with 
                     contactQty = Set.size(card.contacts);
-                };
+                });
             }
         }
     };
@@ -223,6 +330,7 @@ actor {
                 case (?card) {
                     let currentCardPreview: CardPreview = {
                         card with
+                        positions = if(card.visiblePositions){ card.positions } else {[]};
                         contactQty = Set.size(card.contacts);
                     };
                     bufferPreviewCards.add(currentCardPreview);
@@ -233,10 +341,21 @@ actor {
         let thereIsMore = arrayCardsOwners.size() > (page + 1) * 10;
         #Ok({cardsPreview = Buffer.toArray<CardPreview>(bufferPreviewCards); thereIsMore}) 
     };
+
+    public query func getCompanyById(id: Nat): async {#Ok: Company; #Err: Text} {
+        let company = Map.get<CompanyId, Company>(companies, nhash, id);
+        switch company {
+            case null {#Err("Invalid Company ID")};
+            case(?company) {
+                #Ok(company)
+            }
+        }
+    };
   
   ///////////////////////////// Interaction functions between cards ///////////////////////////
     
     public shared ({ caller }) func shareCard(p: Principal):async  {#Ok; #Err: Text} {
+        if(caller == p) {return #Err("You cannot share your card with yourself")};
         let callerCard = Map.get<Principal, Card>(cards, phash, caller);
         switch callerCard {
             case null { #Err("The caller does not have a card") };
