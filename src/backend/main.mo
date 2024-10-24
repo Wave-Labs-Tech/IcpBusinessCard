@@ -19,6 +19,7 @@ actor {
     type CardPublicData = Types.CardPublicData;
     type CompleteCardData = Types.CompleteCardData;
     type UpdatableData = Types.UpdatableData;
+    type Certificate = Types.Certificate;
     type Id = Nat;
     type CreateResult = { #Ok: Id; #Err: Text };
     type GetPublicCardsResult = {
@@ -64,7 +65,8 @@ actor {
             requestsEmployee: [Position] = [];
             score = 0;
             rewiews: [Text] = [];
-            historyLog = []
+            historyLog = [];
+            certificates: [Certificate] = [];
         };
         ignore Map.put<Principal, Card>(cards, phash, owner, newCard);
         ignore Set.put<Principal>(publicCards, phash, owner);
@@ -207,7 +209,7 @@ actor {
         };
     };
 
-  ///////////////////////////////////// Update Functions //////////////////////////////////////////////////////////
+  ///////////////////////////////////// Setters Functions //////////////////////////////////////////////////////////
     public shared ({ caller }) func updateCard(data: UpdatableData): async {#Ok: CardPublicData; #Err: Text} {
         let card = Map.get<Principal, Card>(cards,phash, caller);
         switch card {
@@ -242,6 +244,18 @@ actor {
             }
         }
     };
+
+    // public shared ({ caller }) func addCertificate(c: Certificate):async {#Ok; #Err} {
+    //     let card = Map.get<Principal, Card>(cards, phash, caller);
+    //     switch card {
+    //         case null { #Err };
+    //         case ( ?card ) {
+
+    //         }
+    //     }
+    //     title: Text;
+    //     url: ?Text;
+    // };
 
   ///////////////////////////////////////// Getters ///////////////////////////////////////////
   

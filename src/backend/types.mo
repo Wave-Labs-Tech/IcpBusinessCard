@@ -27,6 +27,7 @@ module {
         score: Nat;
         rewiews: [Text];
         historyLog: [EventId];
+        certificates: [Certificate]
 
     };
 
@@ -37,6 +38,15 @@ module {
         title: Text;
         description: Text;   
     };
+
+    public type Certificate = {
+        title: Text;
+        url: ?Text;
+    };
+
+    // public func chash(c: Certificate): Nat32 {
+        
+    // };
 
     public type CardPublicData = {
         owner: Principal;
@@ -49,6 +59,7 @@ module {
         rewiews: [Text];
         contactQty: Nat;
         links: [Text];
+        certificates: [Certificate]
     };
     public type CompleteCardData = CardPublicData and {
         requestsEmployee: [Position];
@@ -63,6 +74,7 @@ module {
         profession: Text;
         skils: [Text];
         positions: [Position];
+        certificates: [Certificate]
     };
 
     public type UpdatableData = {

@@ -8,7 +8,7 @@
       "main": "src/backend/main.mo",
       "type": "motoko",
       "declarations": {
-        "output": "src/frontend/src/declarations/backend"
+        "output": "./src/declarations/backend"
       }
     },
     "frontend": {

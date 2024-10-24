@@ -16,6 +16,8 @@ Debido a la posible sensibilidad del contenido de los archivos anteriormente men
 
 Los eventos que involucren el almacenamiento de archivos multimedia pueden requerir un pago adicional.
 
+Nota especial: Para el caso de una expansion futura en la cual un usuario pueda generar varias Cards con la misma identidad, se requiere que todas en las funciones de interaccion entre Cards, el caller se establezca por la identidad que ejecuta la funcion en ese momento y adicionalmente se envia un parametro extra a la fucnion con el cual se identifica la card especifica que el caller esta usando en ese momento. Un requerimiento para la ejecucion es que el caller sea el owner de la cardID que se envio como parametro.
+
 
 
 
