@@ -9,7 +9,7 @@ interface AuthContextProps {
     identity: Identity;
     login: () => Promise<void>;
     logout: () => Promise<void>;
-    backendActor: ActorSubclass<_SERVICE> | null;  // Actor del backend
+
 }
 
 const defaultAuthContext: AuthContextProps = {
@@ -17,7 +17,6 @@ const defaultAuthContext: AuthContextProps = {
     identity: new AnonymousIdentity(),
     login: async () => { },
     logout: async () => { },
-    backendActor: null  // El actor por defecto es null
 };
 
 declare let process: {
@@ -41,7 +40,6 @@ console.log("InternetIdentity URL: ", internetIdentityUrl);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [identity, setIdentity] = useState<Identity>(new AnonymousIdentity());
-    const [backendActor, setBackendActor] = useState<ActorSubclass<_SERVICE> | null>(null);  // Estado para almacenar el actor
 
     useEffect(() => {
         init();
@@ -59,25 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsAuthenticated(true);
         }
 
-        // Crea el actor del backend utilizando la identidad
-        const actor = createActorWithIdentity(identity);
-        setBackendActor(actor);
     }
-
-    const createActorWithIdentity = (identity: Identity) => {
-        const agent = new HttpAgent({ identity });
-
-        // Si es un entorno local, podría ser necesario llamar a fetchRootKey para evitar problemas de certificados
-        if (network === "local") {
-            agent.fetchRootKey();
-        }
-
-        // Crea y devuelve el actor usando el IDL y el canisterId
-        return Actor.createActor<_SERVICE>(idlFactory, {
-            agent,
-            canisterId,
-        });
-    };
 
     const login = async () => {
         const authClient = await AuthClient.create();
@@ -88,9 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setIdentity(identity);
                 setIsAuthenticated(true);
 
-                // Crea el actor con la nueva identidad
-                const actor = createActorWithIdentity(identity);
-                setBackendActor(actor);
             },
             onError: (err) => console.error(err),
         });
@@ -102,12 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIdentity(new AnonymousIdentity());
         setIsAuthenticated(false);
 
-        // Reestablece el actor a null al cerrar sesión
-        setBackendActor(null);
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, identity, login, logout, backendActor }}>
+        <AuthContext.Provider value={{ isAuthenticated, identity, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

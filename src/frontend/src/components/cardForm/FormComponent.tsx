@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 // import { backend } from '../../declarations/backend';
-import { resizeImage } from '../../utils/imageUtils'; // Importamos la función desde utils
+import { resizeImage } from '../../utils/imageUtils';
 
 // Definimos los tipos
 type Text = string;
@@ -20,7 +20,6 @@ type FormData = {
 
 const FormComponent: React.FC = () => {
 
-    const { backendActor } = useContext(AuthContext);
 
     const [formData, setFormData] = useState<FormData>({
         name: "",
@@ -54,18 +53,17 @@ const FormComponent: React.FC = () => {
                     const uint8Array = new Uint8Array(arrayBuffer);
 
                     // Redimensionar la imagen para que tenga un tamaño máximo de 100 KB
-                    const resizedPhoto = await resizeImage(file, 100); // Usamos la función importada
+                    const resizedPhoto = await resizeImage(file, 100); 
                     const resizedArrayBuffer = await resizedPhoto.arrayBuffer();
                     const resizedUint8Array = new Uint8Array(resizedArrayBuffer);
 
                     console.log("Original photo bytes:", uint8Array.length);
                     console.log("Resized photo bytes:", resizedUint8Array.length);
 
-                    // Guardamos ambas versiones en el estado
                     setFormData({
                         ...formData,
                         photo: uint8Array,
-                        photoPreview: resizedUint8Array, // Almacenamos la foto reducida en photoPreview
+                        photoPreview: resizedUint8Array,
                     });
                     setPhotoError(null); // Reseteamos el error si es válido
                 } catch (error) {
@@ -83,10 +81,8 @@ const FormComponent: React.FC = () => {
 
     const handleFormSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!backendActor) {
-            console.error("El actor del backend no está disponible.");
-            return;
-        }
+        
+        
 
         const validPhoto = formData.photo ? formData.photo : new Uint8Array();
         const validPhotoPreview = formData.photoPreview ? formData.photoPreview : new Uint8Array();
@@ -97,7 +93,7 @@ const FormComponent: React.FC = () => {
             photoPreview: validPhotoPreview
         };
 
-        await backendActor.createCard(dataToSend);
+        //Enviar los datos al la funcion createCard del backend
         console.log(dataToSend);
     };
 
