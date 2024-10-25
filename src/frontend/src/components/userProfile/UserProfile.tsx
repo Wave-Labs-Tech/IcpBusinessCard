@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { backend } from '../../declarations/backend';
-import {CompleteCardData} from "../../declarations/backend/backend.did"
+import {CompleteCardData} from "../../declarations/backend/backend.did";
+import CreateCard from "../cardForm/CreateCard";
 
 
 export function UserProfile() {
@@ -51,7 +52,7 @@ export function UserProfile() {
             </div>
           ) : (
             <div>
-              <button onClick={() => console.log('Create Card')}>Create Card</button>
+              <CreateCard/>
             </div>
           )}
         </div>

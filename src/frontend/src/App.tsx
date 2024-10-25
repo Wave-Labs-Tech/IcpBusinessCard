@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import LoginButton from './components/auth/LoginButton';
 import LogoutButton from './components/auth/LogoutButton';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { UserProfile } from './components/userProfile/UserProfile';
 import { AuthContext } from './context/AuthContext';
 import { createActor } from './declarations/backend';
@@ -10,40 +10,44 @@ import { Principal } from "@dfinity/principal";
 
 function App() {
   const { isAuthenticated, identity } = useContext(AuthContext);
-  
 
-  let canisterId:  string | undefined = process.env.REACT_APP_CANISTER_ID_BACKEND;
+  let canisterId: string | undefined = process.env.REACT_APP_CANISTER_ID_BACKEND;
 
   if (!canisterId) {
     throw new Error("El canister ID no está definido.");
   }
 
-  let backend  = createActor(Principal.fromText(canisterId), {
+  let backend = createActor(Principal.fromText(canisterId), {
     agentOptions: {
       identity: identity,
       host: "http://localhost:4943",
     },
   });
-  if(isAuthenticated){
-    console.log(backend.getPaginatePublicCards(BigInt(0)));
-    console.log(backend.whoAmI());
-  };
+
+  if (isAuthenticated) {
+    console.log( backend.getPaginatePublicCards(BigInt(0)));
+    console.log( backend.whoAmI());
+  }
 
   return (
     <div className="App">
+      {/* Header */}
       <header className="App-header">
-      <div className="header-title">ICP Business Card</div>
+        <div className="header-title">ICP Business Card</div>
         {isAuthenticated ? <LogoutButton /> : <LoginButton />}
       </header>
+
+      {/* User Profile and additional information */}
       {isAuthenticated ? (
         <div>
-          <UserProfile/>
+          <UserProfile />
           <div>User Principal ID: </div>
-          <div style={{fontSize: '0.8rem'}}>{identity.getPrincipal().toString()}</div>
+          <div style={{ fontSize: '0.8rem' }}>{identity.getPrincipal().toString()}</div>
         </div>
       ) : null}
       <div className="additional-info">Frontend en desarrollo</div>
-      
+
+      {/* Link */}
       <a
         className="link"
         href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jkmf4-caaaa-aaaal-amq3q-cai"
@@ -52,6 +56,16 @@ function App() {
       >
         Interfase candid del Backend
       </a>
+
+      {/* Footer */}
+      <footer className="App-footer">
+        <div className="footer-title">Wave Lab Tech</div>
+        <ul className="footer-links">
+          <li><a href="#">Link 1</a></li>
+          <li><a href="#">Link 2</a></li>
+          <li><a href="#">Link 3</a></li>
+        </ul>
+      </footer>
     </div>
   );
 }
