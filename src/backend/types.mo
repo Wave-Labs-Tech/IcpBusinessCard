@@ -10,9 +10,7 @@ module {
         photo: Blob; //Foto original hasta 1.5 MB 
         photoPreview: Blob; //Foto reducida para previsualización < 64Kb
         profession: Text;
-        skils: [Text];
-        visiblePositions: Bool;
-        positions: [Position];
+        skils: [Text];  
         links: [Text]
     };
 
@@ -26,6 +24,8 @@ module {
         contactRequests: Set.Set<Principal>;
         score: Nat;
         rewiews: [Text];
+        visiblePositions: Bool;
+        positions: [Position];
         historyLog: [EventId];
         certificates: [Certificate]
 

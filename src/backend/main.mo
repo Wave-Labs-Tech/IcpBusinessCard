@@ -7,7 +7,7 @@ import Principal "mo:base/Principal";
 import Buffer "mo:base/Buffer";
 import Prim "mo:⛔";
 
-actor {
+shared ({ caller }) actor class BusinessCard () = this {
   ////////////////////////////// Types declarations ///////////////////////////////////////////
   // Interactions
     type CompanyInit = Types.CompaniInit;
@@ -33,11 +33,16 @@ actor {
     stable let companiesId = Map.new<Principal, CompanyId>();
     stable let companies = Map.new<CompanyId, Company>();
     stable let cards = Map.new<Principal, Card>();
+    stable let admins = Set.new<Principal>();
     stable let publicCards = Set.new<Principal>();
     stable var lastCompanyId = 0;
-    stable var updateLockTime: Int = 43_200_000_000_000; // 12 horas en nanosegundos; 
+    stable var updateLockTime: Int = 43_200_000_000_000; // 12 horas en nanosegundos;
+
   
   /////////////////////////////// Private Functions ///////////////////////////////////////////
+
+    Set.add<Principal>(admins, phash, caller);
+
     func isCompany(p: Principal): Bool {
         switch(Map.get<Principal, CompanyId>(companiesId, phash, p)){
             case null { false };
@@ -51,6 +56,8 @@ actor {
             case (_) { true };
         }
     };
+
+    // func isAdmin
 
     func safeCreateCard(init: CardDataInit, owner: Principal, creator: Principal): {#Ok: CardPublicData; #Err: Text} {
         if(hasCard(owner)){ return #Err("The caller already has a card associated")};
@@ -66,6 +73,8 @@ actor {
             score = 0;
             rewiews: [Text] = [];
             historyLog = [];
+            visiblePositions = false;
+            positions: [Position] = [];
             certificates: [Certificate] = [];
         };
         ignore Map.put<Principal, Card>(cards, phash, owner, newCard);
@@ -79,6 +88,12 @@ actor {
         #Ok(publicData);
     };
 
+  ////////////////////////////////// Only admins //////////////////////////////////////////////
+
+    // public shared ({ caller }) func addAdmin(a: Principal): async Bool {
+
+    // };
+  
   ///////////////////////////// Create elements and setters funcions //////////////////////////
 
     public shared ({ caller }) func setUpdateLockTime(seg: Int):async Int{
