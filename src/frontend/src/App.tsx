@@ -32,6 +32,10 @@ function App() {
   return (
     <div className="App">
       {/* Header */}
+      <div className="bg-blue-500 text-white p-4 text-center">
+      <h1 className="text-3xl font-bold">Hello, Tailwind CSS!</h1>
+      <p className="mt-4">Tu proyecto React ya tiene Tailwind configurado.</p>
+    </div>
       <header className="App-header">
         <div className="header-title">ICP Business Card</div>
         {isAuthenticated ? <LogoutButton /> : <LoginButton />}
