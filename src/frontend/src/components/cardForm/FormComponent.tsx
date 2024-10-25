@@ -1,9 +1,5 @@
-import React, { useState, ChangeEvent, FormEvent, useContext } from 'react';
-import { AuthContext } from '../../context/AuthContext';
-// import { backend } from '../../declarations/backend';
-import { resizeImage } from '../../utils/imageUtils';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 
-// Definimos los tipos
 type Text = string;
 type Nat = bigint;
 
@@ -11,7 +7,7 @@ type FormData = {
     name: Text;
     email: Text;
     phone: Nat;
-    photo: Uint8Array | null; // La foto puede ser null al principio
+    photo: Uint8Array | null;
     photoPreview: Uint8Array | null;
     profession: Text;
     skils: Text[];
@@ -19,8 +15,6 @@ type FormData = {
 };
 
 const FormComponent: React.FC = () => {
-
-
     const [formData, setFormData] = useState<FormData>({
         name: "",
         email: "",
@@ -32,40 +26,28 @@ const FormComponent: React.FC = () => {
         links: []
     });
 
-    const [photoError, setPhotoError] = useState<string | null>(null); 
+    const [photoError, setPhotoError] = useState<string | null>(null);
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Manejador de cambio de archivo (foto)
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
-
         if (file) {
-            if (file.size > 1.5 * 1024 * 1024) { // Limitar tamaño a 1.5MB
+            if (file.size > 1.5 * 1024 * 1024) {
                 setPhotoError("El tamaño de la foto no debe superar los 1.5 MB");
             } else {
                 try {
-                    // Convertimos el archivo original a Uint8Array
                     const arrayBuffer = await file.arrayBuffer();
                     const uint8Array = new Uint8Array(arrayBuffer);
-
-                    // Redimensionar la imagen para que tenga un tamaño máximo de 100 KB
-                    const resizedPhoto = await resizeImage(file, 100); 
-                    const resizedArrayBuffer = await resizedPhoto.arrayBuffer();
-                    const resizedUint8Array = new Uint8Array(resizedArrayBuffer);
-
-                    console.log("Original photo bytes:", uint8Array.length);
-                    console.log("Resized photo bytes:", resizedUint8Array.length);
-
                     setFormData({
                         ...formData,
                         photo: uint8Array,
-                        photoPreview: resizedUint8Array,
+                        photoPreview: uint8Array,
                     });
-                    setPhotoError(null); // Reseteamos el error si es válido
+                    setPhotoError(null);
                 } catch (error) {
                     console.error("Error al procesar el archivo:", error);
                     setPhotoError("Error al procesar el archivo.");
@@ -81,96 +63,93 @@ const FormComponent: React.FC = () => {
 
     const handleFormSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        
-        
-
-        const validPhoto = formData.photo ? formData.photo : new Uint8Array();
-        const validPhotoPreview = formData.photoPreview ? formData.photoPreview : new Uint8Array();
-
+        const validPhoto = formData.photo || new Uint8Array();
+        const validPhotoPreview = formData.photoPreview || new Uint8Array();
         const dataToSend = { 
             ...formData, 
             photo: validPhoto,
             photoPreview: validPhotoPreview
         };
-
-        //Enviar los datos al la funcion createCard del backend
         console.log(dataToSend);
     };
 
     return (
-        <form onSubmit={handleFormSubmit}>
-            {/* Campo name */}
-            <label>
-                Name:
+        <form onSubmit={handleFormSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-md space-y-4">
+            <h2 className="text-2xl font-semibold text-center">Formulario de Usuario</h2>
+
+            <label className="block">
+                <span className="text-gray-700">Name:</span>
                 <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
 
-            {/* Campo email */}
-            <label>
-                Email:
+            <label className="block">
+                <span className="text-gray-700">Email:</span>
                 <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
 
-            {/* Campo phone */}
-            <label>
-                Phone:
+            <label className="block">
+                <span className="text-gray-700">Phone:</span>
                 <input
                     type="number"
                     name="phone"
                     value={formData.phone.toString()}
                     onChange={handlePhoneChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
 
-            {/* Campo photo */}
-            <label>
-                Photo (max 1.5 MB):
-                <input type="file" accept="image/*" onChange={handleFileChange} />
-                {photoError && <p style={{ color: "red" }}>{photoError}</p>}
+            <label className="block">
+                <span className="text-gray-700">Photo (max 1.5 MB):</span>
+                <input type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full"/>
+                {photoError && <p className="text-red-500 text-sm mt-1">{photoError}</p>}
             </label>
 
-            {/* Campo profession */}
-            <label>
-                Profession:
+            <label className="block">
+                <span className="text-gray-700">Profession:</span>
                 <input
                     type="text"
                     name="profession"
                     value={formData.profession}
                     onChange={handleInputChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
 
-            {/* Campo skills */}
-            <label>
-                Skills:
+            <label className="block">
+                <span className="text-gray-700">Skills:</span>
                 <textarea
                     name="skills"
                     value={formData.skils.join(", ")}
                     onChange={(e) => setFormData({ ...formData, skils: e.target.value.split(", ") })}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
             
-            {/* Campo links */}
-            <label>
-                Links:
+            <label className="block">
+                <span className="text-gray-700">Links:</span>
                 <textarea
                     name="links"
                     value={formData.links.join(", ")}
                     onChange={(e) => setFormData({ ...formData, links: e.target.value.split(", ") })}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
 
-            <button type="submit">Submit</button>
+            <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                Submit
+            </button>
         </form>
     );
 };

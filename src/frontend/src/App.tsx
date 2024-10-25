@@ -53,7 +53,11 @@ function App() {
     }
 
   };
-  getPaginatePublicCards(3)
+
+  useEffect(() => {
+    getPaginatePublicCards(0); // Asegúrate de que no se ejecute varias veces sin control
+  }, []);
+
 
   /////////////////////////////////////////////////////////////////////////////
 
