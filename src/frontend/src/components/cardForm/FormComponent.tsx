@@ -1,4 +1,5 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useContext} from 'react';
+import {AuthContext} from "../../context/AuthContext"
 
 type Text = string;
 type Nat = bigint;
@@ -15,6 +16,8 @@ type FormData = {
 };
 
 const FormComponent: React.FC = () => {
+    const { backend } = useContext(AuthContext);
+
     const [formData, setFormData] = useState<FormData>({
         name: "",
         email: "",
@@ -70,7 +73,18 @@ const FormComponent: React.FC = () => {
             photo: validPhoto,
             photoPreview: validPhotoPreview
         };
-        console.log(dataToSend);
+        if (backend) {
+            try {
+                // Ejemplo de llamada al backend
+                const result = await backend.whoAmI(); // Reemplaza `someFunction` con tu método
+                console.log("From FormComponnet: backend.whoAmI():", result);
+            } catch (error) {
+                console.error("From FormComponnet: Error al llamar a backend.whoAmI() ", error);
+            }
+        } else {
+            console.warn("FormComponent: No hay backend disponible, asegúrate de que el usuario esté autenticado.");
+        }
+        console.log("FormComponnet: ",dataToSend);
     };
 
     return (

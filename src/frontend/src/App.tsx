@@ -1,71 +1,61 @@
+/* eslint-disable array-callback-return */
 import React, { useState, useContext, useEffect } from 'react';
 import './App.css';
 import LoginButton from './components/auth/LoginButton';
 import LogoutButton from './components/auth/LogoutButton';
 import { UserProfile } from './components/userProfile/UserProfile';
 import { AuthContext } from './context/AuthContext';
-import { createActor } from './declarations/backend';
-import { Principal } from "@dfinity/principal";
+// import { createActor } from './declarations/backend';
+// import { Principal } from "@dfinity/principal";
 
 
 
 function App() {
-  const { isAuthenticated, identity } = useContext(AuthContext);
-  const [whoAmI, setWhoAmI] = useState("");
-  const [page, setPage] = useState(0);
-
+  
+  // const [page, setPage] = useState(0);
+  const { isAuthenticated, backend, identity } = useContext(AuthContext)
+  const [whoAmI, setWhoAmI] = useState(identity.getPrincipal().toText());
   let canisterId: string | undefined = process.env.REACT_APP_CANISTER_ID_BACKEND;
 
   if (!canisterId) {
     throw new Error("El canister ID no está definido.");
   }
 
-  let backend = createActor(Principal.fromText(canisterId), {
-    agentOptions: {
-      identity: identity,
-      host: "http://localhost:4943",
-    },
-  });
 
-  if (isAuthenticated) {
-    console.log(backend.getPaginatePublicCards(BigInt(0)));
-    console.log(backend.whoAmI());
-  }
-
-  //////////////////////// Esta funcion y su respectiva llamada andan bien /////
+  ////////////////////// Esta funcion y su respectiva llamada andan bien /////
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getPaginatePublicCards = async (index: number) => {
-    console.log("getPaginatePublicCards")
-    let response = await backend.getPaginatePublicCards(BigInt(index));
+    setWhoAmI(await backend.whoAmI());    // BORRAR
+    console.log("From App.tsx whoAmI: ", whoAmI);      // BORRAR
+    if (backend) {
+      let response = await backend.getPaginatePublicCards(BigInt(index));
 
-    if ("Ok" in response) {
+      if ("Ok" in response) {
+        console.log("From App.tsx() getPaginatePublicCards")
+        response.Ok.cardsPreview.map(card => {
+          console.log("Usuario:", card);
+        });
+        console.log("¿Hay más elementos?", response.Ok.thereIsMore);
+      } else {
 
-      response.Ok.cardsPreview.map(card => {
-        console.log("Nombre del usuario:", card.name);
-      });
-
-
-      // Guardar thereIsMore en una variable
-      const hayMas = response.Ok.thereIsMore;
-      console.log("¿Hay más elementos?", hayMas);
-    } else {
-      // Si la respuesta tiene un error, maneja el caso
-      console.error("Error:", response.Err);
+        console.log("Error al llamar a getPaginateCards")
+        console.error("Error:", response.Err);
+      }
     }
-
   };
 
   useEffect(() => {
-    getPaginatePublicCards(0); // Asegúrate de que no se ejecute varias veces sin control
-  }, []);
-
+    getPaginatePublicCards(0); 
+  }, [getPaginatePublicCards, isAuthenticated]);
 
   /////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
     const fetchWhoAmI = async () => {
-      if (isAuthenticated) {
+      if (isAuthenticated && backend) {
         try {
-          console.log(await backend.whoAmI());
+          setWhoAmI(await backend.whoAmI());
+          console.log("From App.tsx: WhoAmI", whoAmI);
         } catch (error) {
           console.error("Error al llamar a whoAmI:", error);
         }
@@ -73,7 +63,7 @@ function App() {
     };
 
     fetchWhoAmI();
-  }, [isAuthenticated, backend]);
+  }, [isAuthenticated, backend, whoAmI]);
 
   return (
     <div className="App">
