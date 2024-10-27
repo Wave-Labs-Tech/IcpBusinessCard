@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useCallback, useEffect, useState } from 'react';
 import { AuthClient } from "@dfinity/auth-client";
 import { Actor, HttpAgent, AnonymousIdentity, Identity, ActorSubclass } from "@dfinity/agent";
 import { backend as createdActor, canisterId, idlFactory } from "../declarations/backend"; // Ajusta la ruta según sea necesario
@@ -9,7 +9,7 @@ interface AuthContextProps {
     identity: Identity;
     login: () => Promise<void>;
     logout: () => Promise<void>;
-
+    backendActor: ActorSubclass<_SERVICE> | null;  // Actor del backend
 }
 
 const defaultAuthContext: AuthContextProps = {
@@ -17,11 +17,13 @@ const defaultAuthContext: AuthContextProps = {
     identity: new AnonymousIdentity(),
     login: async () => { },
     logout: async () => { },
+    backendActor: null  // El actor por defecto es null
 };
 
 declare let process: {
     env: {
         REACT_APP_DFX_NETWORK: string;
+        REACT_APP_CANISTER_ID: string;
     }
 };
 
@@ -34,18 +36,23 @@ const internetIdentityUrl =
 
 export const AuthContext = createContext<AuthContextProps>(defaultAuthContext);
 
-console.log("Network:", process.env.REACT_APP_DFX_NETWORK);
-console.log("InternetIdentity URL: ", internetIdentityUrl);
+// console.log("Network:", process.env.REACT_APP_DFX_NETWORK);
+// console.log("Canister_ID:", process.env.REACT_APP_CANISTER_ID);
+// console.log("InternetIdentity URL: ", internetIdentityUrl);
+console.log("createdActor AuthContext: ", createdActor);
+console.log("idlFactory: ",idlFactory);
+console.log("canisterId: ", canisterId);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [identity, setIdentity] = useState<Identity>(new AnonymousIdentity());
+    const [backendActor, setBackendActor] = useState<ActorSubclass<_SERVICE> | null>(null);  // Estado para almacenar el actor
 
     useEffect(() => {
         init();
     }, []);
 
-    async function init() {
+    const init = useCallback(async () => {
         const authClient = await AuthClient.create();
         const identity = authClient.getIdentity();
 
@@ -57,20 +64,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsAuthenticated(true);
         }
 
-    }
+        // Crea el actor del backend utilizando la identidad
+        // const actor = await createActorWithIdentity(identity);
+        const actor = await createActorWithIdentity(identity);
+        if (actor) setBackendActor(actor);
+    }, []);
+
+
+    const createActorWithIdentity = async (identity: Identity) => {
+
+        const agent = await HttpAgent.create({
+            identity,
+            // Añadir cualquier otro parámetro necesario, como host o fetch
+        });
+
+        // Si es un entorno local, podría ser necesario llamar a fetchRootKey para evitar problemas de certificados
+        if (network === "local") {
+            agent.fetchRootKey();
+        }
+
+
+        // Crea y devuelve el actor usando el IDL y el canisterId
+        return Actor.createActor<_SERVICE>(idlFactory, {
+            agent,
+            canisterId,
+        });
+    };
 
     const login = async () => {
-        const authClient = await AuthClient.create();
-        authClient.login({
-            identityProvider: internetIdentityUrl,
-            onSuccess: () => {
-                const identity = authClient.getIdentity();
-                setIdentity(identity);
-                setIsAuthenticated(true);
+        try {
+            const authClient = await AuthClient.create();
 
-            },
-            onError: (err) => console.error(err),
-        });
+            // Intenta iniciar sesión
+            await authClient.login({
+                identityProvider: internetIdentityUrl,
+                onSuccess: async () => {
+                    const identity = authClient.getIdentity();
+                    setIdentity(identity);
+
+                    // Actualiza el estado de autenticación
+                    setIsAuthenticated(true);
+
+                    // Crea el actor con la nueva identidad
+                    const actor = await createActorWithIdentity(identity);
+                    if (actor) setBackendActor(actor);
+                },
+                onError: (err) => console.error('Error al iniciar sesión:', err),
+            });
+        } catch (error) {
+            console.error('Error durante el inicio de sesión:', error);
+        }
     };
 
     const logout = async () => {
@@ -79,10 +122,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIdentity(new AnonymousIdentity());
         setIsAuthenticated(false);
 
+        // Reestablece el actor a null al cerrar sesión
+        setBackendActor(null);
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, identity, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, identity, login, logout, backendActor }}>
             {children}
         </AuthContext.Provider>
     );
