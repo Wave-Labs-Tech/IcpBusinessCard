@@ -1,19 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.App {
-  background-color: #c0dbee;
-  background-image: url('./assetes/background.webp');
+
+body {
+  /* background-image: url("/fondo.png"); */
+  /* background-repeat: no-repeat;
+
+  /* background-image: url("./assetes/background.webp");
   background-size: cover;
+  margin: auto;
+  min-width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center; */
+}
+.App {
+  /* background-color: #c0dbee; */
+  background-image: url("./assetes/background.webp");
   text-align: center;
   min-height: 100vh; /* Asegura que la altura mínima de la App ocupe toda la pantalla */
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
-.App-footer, .App-header {
+.App-footer,
+.App-header {
   background-color: #011830ce;
-  color: #EAD8B1;
+  color: #ead8b1;
   min-height: 30px;
   padding: 10px;
 }
@@ -25,7 +39,7 @@
 }
 
 .header-title {
-  color: #EAD8B1;
+  color: #ead8b1;
   font-size: 2.5rem;
   text-shadow: 3px 3px 6px #1cff14d5;
   flex-grow: 1;
@@ -55,6 +69,7 @@
   position: fixed;
   bottom: 0;
   width: 100%;
+  margin: auto;
   text-align: center;
   z-index: 1000; /* Asegura que el footer esté siempre en la parte superior de otros elementos */
 }
@@ -94,7 +109,8 @@
   .footer-title {
     font-size: 1rem;
   }
-  .App-header button, .App-footer {
+  .App-header button,
+  .App-footer {
     font-size: 0.8rem;
     padding: 5px 10px;
   }

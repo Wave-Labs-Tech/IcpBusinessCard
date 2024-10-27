@@ -6,6 +6,10 @@ import { UserProfile } from './components/userProfile/UserProfile';
 import { AuthContext } from './context/AuthContext';
 import { createActor } from './declarations/backend';
 import { Principal } from "@dfinity/principal";
+import { Routes, Route } from 'react-router-dom';
+import CreateCard from './components/cardForm/CreateCard';
+import Navbar from './components/navbar/NavBar';
+import Dashboard from './components/dashboard/Dashboard';
 
 
 
@@ -65,7 +69,9 @@ function App() {
     const fetchWhoAmI = async () => {
       if (isAuthenticated) {
         try {
-          console.log(await backend.whoAmI());
+          const whoAmIResponse = await backend.whoAmI();
+          if (whoAmIResponse) setWhoAmI(whoAmIResponse);
+          console.log("whoAmIResponse",whoAmIResponse);
         } catch (error) {
           console.error("Error al llamar a whoAmI:", error);
         }
@@ -77,38 +83,49 @@ function App() {
 
   return (
     <div className="App">
+      <div className="container">
+        <Routes>
+          {/* <Route path="/" element={<ProductsGrid onAddToCart={handleAddToCart} />} /> */}
+          {/* <Route path="*" element={<ErrorPage />} /> */}
+          <Route path="*" element={<h2>La ruta seguida es erronea</h2>} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/createcard" element={<CreateCard />} />
+          {/* <Route path="/dashboard" element={<Dashboard/>} /> */}
+          <Route path="/userProfile" element={<UserProfile />} />
+        </Routes>
+      </div>
       {/* Header */}
-      {/* <div className="bg-blue-500 text-black p-4 text-center">
-        <h1 className="text-3xl font-bold">Hello, Tailwind CSS!</h1>
-        <p className="mt-4">Tu proyecto React ya tiene Tailwind configurado.</p>
-      </div> */}
-      <header className="App-header">
-        <div className="header-title">ICP Business Card</div>
-        {isAuthenticated ? <LogoutButton /> : <LoginButton />}
-      </header>
-      <div style={{ fontSize: '0.8rem' }}>{whoAmI}</div>
+      {/* <div className="border-2 border-blue-500 text-red-700 p-4 text-center"> */}
+      {/* <h1 className="text-3xl font-bold">Hello, Tailwind CSS!</h1>
+      <p className="mt-4">Tu proyecto React ya tiene Tailwind configurado.</p> */}
+      {/* </div> */}
+      {/*<header className="App-header">*/}
+      {/* <div className="header-title">ICP Business Card</div> */}
+      {/* {isAuthenticated ? <LogoutButton /> : <LoginButton />} */}
+      {/*</header>*/}
 
       {/* User Profile and additional information */}
       {isAuthenticated ? (
         <div>
           <UserProfile />
           <div>User Principal ID: </div>
-          {/* <div style={{ fontSize: '0.8rem' }}>{identity.getPrincipal().toString()}</div> */}
-          <div style={{ fontSize: '0.8rem' }}>{whoAmI}</div>
+          <div style={{ fontSize: '0.8rem' }}>{identity.getPrincipal().toString()}</div>
         </div>
       ) : null}
-      <div className="additional-info">Frontend en desarrollo</div>
+      <div className="text-stone-800 bg-stone-200 m-auto mt-12 mb-36 py-4 px-20 w-fit border-2 border-stone-700 rounded-md shadow-2xl">
+        <p>Frontend en desarrollo</p>
 
       {/* Link */}
       <a
-        className="link"
+        // className="link"
+        className="text-blue-600 bg-stone-300 m-auto p-1 rounded-md shadow-2xl"
         href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jkmf4-caaaa-aaaal-amq3q-cai"
         target="_blank" // Abre el enlace en una nueva pestaña
         rel="noopener noreferrer" // Mejora la seguridad al abrir el enlace
       >
-        Interfase candid del Backend
+        Interface candid del Backend
       </a>
-
+      </div>
       {/* Footer */}
       <footer className="App-footer">
         <div className="footer-title">Wave Lab Tech</div>
