@@ -1,4 +1,3 @@
-// imageUtils.ts
 export const resizeImage = (file: File, maxFileSizeKB: number): Promise<File> => {
     return new Promise((resolve, reject) => {
         const img = document.createElement('img');
@@ -11,31 +10,40 @@ export const resizeImage = (file: File, maxFileSizeKB: number): Promise<File> =>
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
 
-                // Definir nuevas dimensiones manteniendo la relación de aspecto
+                // Definir el tamaño deseado
                 let width = img.width;
                 let height = img.height;
                 const maxFileSizeBytes = maxFileSizeKB * 1024;
+                let quality = 0.7; // Calidad inicial
 
-                // Ajustar el tamaño de la imagen para que no sobrepase el tamaño en KB
-                let scaleFactor = Math.sqrt(maxFileSizeBytes / file.size); // Relación entre tamaño actual y deseado
-                canvas.width = width * scaleFactor;
-                canvas.height = height * scaleFactor;
+                const resizeAndCompress = () => {
+                    // Calcular escala necesaria
+                    const scaleFactor = Math.sqrt(maxFileSizeBytes / file.size);
+                    canvas.width = width * scaleFactor;
+                    canvas.height = height * scaleFactor;
+                    ctx?.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Dibujamos la imagen redimensionada en el canvas
-                ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // Dibujar la imagen redimensionada
+                    ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                // Convertimos el canvas a Blob para reducir el tamaño
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        // Asegurarnos de que el tamaño es adecuado
-                        if (blob.size <= maxFileSizeBytes) {
-                            const resizedFile = new File([blob], file.name, { type: file.type });
-                            resolve(resizedFile);
-                        } else {
-                            reject(new Error("No se pudo reducir la imagen al tamaño deseado."));
+                    // Convertir a Blob con el tipo adecuado
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            // Si el tamaño es adecuado, devolver el archivo redimensionado
+                            if (blob.size <= maxFileSizeBytes) {
+                                const resizedFile = new File([blob], file.name, { type: file.type });
+                                resolve(resizedFile);
+                            } else if (quality > 0.1) { // Reducir la calidad y volver a intentar
+                                quality -= 0.1;
+                                resizeAndCompress();
+                            } else {
+                                reject(new Error("No se pudo reducir la imagen al tamaño deseado."));
+                            }
                         }
-                    }
-                }, file.type, 0.7); // Ajustamos la calidad de la imagen (0.7 para reducir aún más)
+                    }, file.type === "image/png" ? "image/jpeg" : file.type, quality); // Convertir a JPEG si es PNG
+                };
+
+                resizeAndCompress();
             };
         };
 

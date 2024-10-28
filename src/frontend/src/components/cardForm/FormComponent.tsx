@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent, useContext} from 'react';
 import {AuthContext} from "../../context/AuthContext"
+import { resizeImage } from "../../utils/imageUtils";
 
 type Text = string;
 type Nat = bigint;
@@ -15,7 +16,11 @@ type FormData = {
     links: Text[];
 };
 
-const FormComponent: React.FC = () => {
+interface FormComponentProps {
+    onSubmit: () => void;
+}
+
+const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
     const { backend } = useContext(AuthContext);
 
     const [formData, setFormData] = useState<FormData>({
@@ -43,12 +48,13 @@ const FormComponent: React.FC = () => {
                 setPhotoError("El tamaño de la foto no debe superar los 1.5 MB");
             } else {
                 try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const uint8Array = new Uint8Array(arrayBuffer);
+                    const photo = new Uint8Array(await file.arrayBuffer());
+                    let resizeFile = await resizeImage(file, 120);
+                    let thumnailPhoto = new Uint8Array(await resizeFile.arrayBuffer());
                     setFormData({
                         ...formData,
-                        photo: uint8Array,
-                        photoPreview: uint8Array,
+                        photo: photo,
+                        photoPreview: thumnailPhoto,
                     });
                     setPhotoError(null);
                 } catch (error) {
@@ -75,16 +81,20 @@ const FormComponent: React.FC = () => {
         };
         if (backend) {
             try {
-                // Ejemplo de llamada al backend
                 const result = await backend.whoAmI(); // Reemplaza `someFunction` con tu método
                 console.log("From FormComponnet: backend.whoAmI():", result);
+                let resultCreateCard = await backend.createCard(dataToSend);
+                console.log("FormComponnet: ",resultCreateCard);
+                // console.log("From FormComponent createCard(): ", resultCreateCard);
+                // console.log("From FormComponent createCard(): ", await backend.getMyCard());
             } catch (error) {
                 console.error("From FormComponnet: Error al llamar a backend.whoAmI() ", error);
-            }
+            };
+            onSubmit();
         } else {
             console.warn("FormComponent: No hay backend disponible, asegúrate de que el usuario esté autenticado.");
         }
-        console.log("FormComponnet: ",dataToSend);
+        
     };
 
     return (

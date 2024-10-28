@@ -4,8 +4,21 @@ import { HttpAgent, Identity, AnonymousIdentity, ActorSubclass } from "@dfinity/
 import { createActor, /* canisterId */ } from "../declarations/backend";
 import { _SERVICE } from "../declarations/backend/backend.did";
 
-const canisterId = process.env.REACT_APP_CANISTER_ID_BACKEND as string;
-console.log("From AuthContext: canisterID", canisterId);
+const canisterId = process.env.REACT_APP_DFX_NETWORK === 'ic'
+    ? 'jkmf4-caaaa-aaaal-amq3q-cai' // ID de mainnet desde canisters_ids.json
+    : process.env.REACT_APP_CANISTER_ID_BACKEND as string;
+
+
+const internetIdentityUrl =
+    process.env.REACT_APP_DFX_NETWORK === "local"
+        ? "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai"
+        : "https://identity.ic0.app";
+
+const host = 
+    process.env.REACT_APP_DFX_NETWORK === "local"
+    ? "http://localhost:4943"
+    : "https://ic0.app"
+
 
 
 interface AuthContextProps {
@@ -20,16 +33,13 @@ const defaultAuthContext: AuthContextProps = {
     isAuthenticated: false,
     identity: new AnonymousIdentity(),
     backend: createActor(canisterId, {
-        agentOptions: { identity: new AnonymousIdentity(), host: "http://localhost:4943" }
+        agentOptions: { identity: new AnonymousIdentity(), host }
     }),
     login: async () => { },
     logout: async () => { },
 };
 
-const internetIdentityUrl =
-    process.env.REACT_APP_DFX_NETWORK === "local"
-        ? "http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai"
-        : "https://identity.ic0.app";
+
 
 export const AuthContext = createContext<AuthContextProps>(defaultAuthContext);
 
@@ -39,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [backend, setBackend] = useState<ActorSubclass<_SERVICE>>(
         // Inicializa `backend` con una `AnonymousIdentity`
         createActor(canisterId!, {
-            agentOptions: { identity: new AnonymousIdentity(), host: "http://localhost:4943" }
+            agentOptions: { identity: new AnonymousIdentity(), host }
         })
     );
 
@@ -52,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const setupAgent = async () => {
             const agent = await HttpAgent.create({
                 identity,
-                host: "http://localhost:4943",
+                host,
             });
             setBackend(createActor(canisterId, { agent }));
             console.log("From AuthContext backend: ", backend);
@@ -94,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Reinicia `backend` para usuarios no autenticados
         setBackend(
             createActor(canisterId, {
-                agentOptions: { identity: new AnonymousIdentity(), host: "http://localhost:4943" }
+                agentOptions: { identity: new AnonymousIdentity(), host }
             })
         );
     };

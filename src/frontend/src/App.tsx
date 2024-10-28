@@ -76,7 +76,6 @@ function App() {
         <div className="header-title">ICP Business Card</div>
         {isAuthenticated ? <LogoutButton /> : <LoginButton />}
       </header>
-      <div style={{ fontSize: '0.8rem' }}>{whoAmI}</div>
 
       {/* User Profile and additional information */}
       {isAuthenticated ? (

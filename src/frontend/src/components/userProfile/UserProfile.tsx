@@ -10,6 +10,7 @@ export function UserProfile() {
   const [cardData, setCardData] = useState<CompleteCardData | null>(null);  // Estado para los datos de la tarjeta
   const [error, setError] = useState<string | null>(null);  // Estado para los errores
   const [loading, setLoading] = useState(true);  // Estado para controlar el spinner de carga
+  const [formSuccess, setFormSuccess] = useState(false);
 
   useEffect(() => {
     const fetchCardData = async () => {
@@ -21,10 +22,11 @@ export function UserProfile() {
 
           if ('Ok' in response) {
             setCardData(response.Ok);  // Si es Ok, actualizamos cardData con los datos de la tarjeta
-          } else {
+          } else {      
             setError("Card not found");
           }
         } catch (err) {
+          setCardData(null)
           console.error("Error fetching card data:", err);
           setError("An error occurred");
         } finally {
@@ -34,7 +36,11 @@ export function UserProfile() {
     };
 
     fetchCardData();
-  }, [isAuthenticated, identity]);
+  }, [isAuthenticated, identity, backend, formSuccess ]);
+
+  const handleFormSuccess = () => {
+    setFormSuccess(true);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -53,7 +59,7 @@ export function UserProfile() {
             </div>
           ) : (
             <div>
-              <CreateCard/>
+              <CreateCard onFormSubmit={handleFormSuccess} />
             </div>
           )}
         </div>
