@@ -38,6 +38,7 @@ shared ({ caller }) actor class BusinessCard () = this {
     stable var lastCompanyId = 0;
     stable var updateLockTime: Int = 43_200_000_000_000; // 12 horas en nanosegundos;
 
+
   
   /////////////////////////////// Private Functions ///////////////////////////////////////////
 
@@ -258,6 +259,18 @@ shared ({ caller }) actor class BusinessCard () = this {
                 true
             }
         }
+    };
+
+    public shared ({ caller }) func setVisibilityCard(visible: Bool): async {#Ok; #Err: Text} {
+        if(not hasCard(caller)){
+            return #Err("There is no user associated with the caller")
+        };
+        if(visible){
+            Set.add(publicCards, phash, caller);
+            return #Ok
+        };
+        ignore Set.remove(publicCards, phash, caller);
+        #Ok
     };
 
     // public shared ({ caller }) func addCertificate(c: Certificate):async {#Ok; #Err} {

@@ -45,7 +45,7 @@ const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
             if (file.size > 1.5 * 1024 * 1024) {
-                setPhotoError("El tamaño de la foto no debe superar los 1.5 MB");
+                setPhotoError("El tamaño de la foto no debe superar los 1.5 MB"); // Se puede redimensionar directamente
             } else {
                 try {
                     const photo = new Uint8Array(await file.arrayBuffer());

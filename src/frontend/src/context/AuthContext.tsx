@@ -65,10 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 host,
             });
             setBackend(createActor(canisterId, { agent }));
-            console.log("From AuthContext backend: ", backend);
-
         };
-
         setupAgent();
     }, [identity]);
 

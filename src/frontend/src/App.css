@@ -104,4 +104,9 @@
   .link {
     font-size: 1.5rem;
   }
+  .hidden-on-mobile {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
 }

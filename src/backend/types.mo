@@ -10,7 +10,7 @@ module {
         photo: Blob; //Foto original hasta 1.5 MB 
         photoPreview: Blob; //Foto reducida para previsualización < 64Kb
         profession: Text;
-        skils: [Text];  
+        skils: [Text];
         links: [Text]
     };
 
@@ -28,7 +28,6 @@ module {
         positions: [Position];
         historyLog: [EventId];
         certificates: [Certificate]
-
     };
 
     public type EventId = Nat;
