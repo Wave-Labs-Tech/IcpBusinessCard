@@ -14,8 +14,7 @@ interface GetPublicCardsResult {
 }
 
 export default function Dashboard({ reverse = false }) {
-//   const { contract, userAddress, isConnected, companyId } = useContract();
-  const [data,] = useState([]);
+  // const [data,] = useState([]);
   const [loading, setLoading] = useState(true);
   // const [cardData, setCardData] = useState([]);
   const [cardData, setCardData] = useState<GetPublicCardsResult>({

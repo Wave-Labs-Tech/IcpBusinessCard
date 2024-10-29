@@ -1,4 +1,8 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useContext } from 'react';
+import { createActor } from "../../declarations/backend";
+import { AuthContext } from '../../context/AuthContext';
+import { Principal } from "@dfinity/principal";
+
 
 type Text = string;
 type Nat = bigint;
@@ -15,6 +19,7 @@ type FormData = {
 };
 
 const FormComponent: React.FC = () => {
+    const { identity } = useContext(AuthContext);  // Accede a la autenticación
     const [formData, setFormData] = useState<FormData>({
         name: "",
         email: "",
@@ -27,6 +32,20 @@ const FormComponent: React.FC = () => {
     });
 
     const [photoError, setPhotoError] = useState<string | null>(null);
+
+      //ELIMINAR declaracion backend si es necesario
+  let canisterId: string | undefined = process.env.REACT_APP_CANISTER_ID_BACKEND;
+
+  if (!canisterId) {
+    throw new Error("El canister ID no está definido.");
+  }
+
+  let backend = createActor(Principal.fromText(canisterId), {
+    agentOptions: {
+      identity: identity,
+      host: "http://localhost:4943",
+    },
+  });
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -71,8 +90,16 @@ const FormComponent: React.FC = () => {
             photoPreview: validPhotoPreview
         };
         console.log(dataToSend);
-    };
+        const response = await backend.createCard(dataToSend);
+        console.log(response) // Agrega esta línea para depurar
+        if("Ok" in response){
+            alert("Tarjeta creada con éxito!");
 
+        }else{
+        alert("Error al crear la tarjeta");
+    };
+    }
+    
     return (
         <form onSubmit={handleFormSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-md space-y-4">
             <h2 className="text-2xl font-semibold text-center">Formulario de Usuario</h2>
