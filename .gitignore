@@ -25,3 +25,6 @@ dist/
 .env
 
 .mops
+src/frontend/build/asset-manifest.json
+src/frontend/build/index.html
+src/frontend/build/*
