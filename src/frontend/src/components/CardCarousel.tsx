@@ -6,98 +6,203 @@ interface CardCarouselProps {
     cards: any[];
     fetchCards: (startIndex: number) => Promise<void>;
     hasMore: boolean;
-    onCardClick: (owner: Principal) => void;
 }
 
-const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore, onCardClick }) => {
+interface CardDataInit {
+    name: string;
+    email: string;
+    phone: string;
+    description: string;
+    photo: string | null;
+}
+
+interface Owner {
+    _arr: Uint8Array;
+    _isPrincipal: boolean;
+    toText: () => string;
+    toJSON: () => { principal: string };
+}
+
+interface Card {
+    owner: Owner;
+    name: string;
+    profession: string;
+    certificates: any[];
+    photoPreview: Uint8Array | null;
+    positions: any[];
+    skils: string[];
+}
+
+
+// Ejemplo de datos de prueba con tres tarjetas en un array
+const testCardData = {
+    cards: [
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Gary Cooper",
+            profession: "Actor",
+            certificates: [],
+            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            positions: [],
+            skils: ["Drama", "comedia"]
+        },
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Gary Cooper 2",
+            profession: "Actor",
+            certificates: [],
+            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            positions: [],
+            skils: ["Drama", "comedia"]
+        },
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Gary Cooper 3",
+            profession: "Actor",
+            certificates: [],
+            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            positions: [],
+            skils: ["Drama", "comedia"]
+        },
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Gary Cooper 4",
+            profession: "Actor",
+            certificates: [],
+            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            positions: [],
+            skils: ["Drama", "comedia"]
+        },
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Gary Cooper 5",
+            profession: "Actor",
+            certificates: [],
+            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            positions: [],
+            skils: ["Drama", "comedia"]
+        },
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Gary Cooper 6",
+            profession: "Actor",
+            certificates: [],
+            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            positions: [],
+            skils: ["Drama", "comedia"]
+        },
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Gary Cooper 7",
+            profession: "Actor",
+            certificates: [],
+            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            positions: [],
+            skils: ["Drama", "comedia"]
+        }
+    ],
+    hasMore: true
+};
+
+const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [page, setPage] = useState(0)
     const startX = useRef(0); // Posición inicial en X cuando empieza el toque
     const endX = useRef(0);   // Posición final en X cuando termina el toque
+    // const containerRef = useRef<HTMLDivElement | null>(null); 
 
-    useEffect(() => {
-        if (currentIndex  > page * 10 + 3 && hasMore) {
-            setPage(page + 1)
-            console.log("get page ", page)
-            fetchCards(page);  // Llamar para cargar más tarjetas
-        }
-    }, [page, currentIndex, cards.length, fetchCards, hasMore]);
+    // useEffect(() => {
+    //     console.log("get page ", page)
+    //     if (currentIndex  > page * 10 + 3 && hasMore) {
+    //         setPage(page + 1)
+    //         console.log("get page ", page)
+    //         fetchCards(page);  // Llamar para cargar más tarjetas
+    //     }
+    // }, [page, currentIndex, cards.length, fetchCards, hasMore]);
+    
+    // const handleNext = () => {
+    //     setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, cards.length - 1));
+    // };
 
-    const handleNext = () => {
-        setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, cards.length - 1));
-    };
+    // const handlePrev = () => {
+    //     setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+    // };
 
-    const handlePrev = () => {
-        setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-    };
+    // // Maneja el toque inicial
+    // const handleTouchStart = (e: React.TouchEvent) => {
+    //     startX.current = e.touches[0].clientX;
+    // };
 
-    // Maneja el toque inicial
-    const handleTouchStart = (e: React.TouchEvent) => {
-        startX.current = e.touches[0].clientX;
-    };
+    // // Maneja el final del toque y determina la dirección del deslizamiento
+    // const handleTouchEnd = () => {
+    //     const deltaX = startX.current - endX.current;
 
-    // Maneja el final del toque y determina la dirección del deslizamiento
-    const handleTouchEnd = () => {
-        const deltaX = startX.current - endX.current;
+    //     if (deltaX > 50) {
+    //         // Deslizar a la izquierda
+    //         handleNext();
+    //     } else if (deltaX < -50) {
+    //         // Deslizar a la derecha
+    //         handlePrev();
+    //     }
+    // };
+    
+    // // Captura el movimiento para actualizar endX
+    // const handleTouchMove = (e: React.TouchEvent) => {
+    //     endX.current = e.touches[0].clientX;
+    // };
+    console.log("CARDS", cards);
+    const PAGE_SIZE = 3; // Número de tarjetas por página
 
-        if (deltaX > 50) {
-            // Deslizar a la izquierda
-            handleNext();
-        } else if (deltaX < -50) {
-            // Deslizar a la derecha
-            handlePrev();
-        }
-    };
 
-    // Captura el movimiento para actualizar endX
-    const handleTouchMove = (e: React.TouchEvent) => {
-        endX.current = e.touches[0].clientX;
-    };
-
+        useEffect(() => {
+            if (page * PAGE_SIZE >= cards.length && hasMore) {
+                fetchCards(cards.length); // Llama a fetchCards para cargar más si estamos al final de las actuales
+            }
+        }, [page, cards.length, hasMore, fetchCards]);
+    
+        const startIndex = page * PAGE_SIZE;
+        const paginatedCards = cards.slice(startIndex, startIndex + PAGE_SIZE); // Obtiene las tarjetas de la página actual
+    
+        const handleNextPage = () => {
+            if (startIndex + PAGE_SIZE < cards.length || hasMore) {
+                setPage((prevPage) => prevPage + 1);
+            }
+        };
+    
+        const handlePrevPage = () => {
+            if (page > 0) {
+                setPage((prevPage) => prevPage - 1);
+            }
+        };
+    // 
     return (
-        <div
-            className="relative flex items-center justify-center w-full max-w-md sm:max-w-3xl lg:max-w-6xl mx-auto"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-        >
-            {/* Botón de navegación hacia atrás */}
-            <button
-                onClick={handlePrev}
-                disabled={currentIndex === 0}
-                className= "p-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 z-10 hidden-on-mobile"
-            >
-                ◀
-            </button>
-
-            <div className="overflow-hidden w-full flex items-left justify-left">
-                <div
-                    className="flex gap-4 transition-transform duration-300"
-                    style={{
-                        transform: `translateX(-${currentIndex * 250}px)`,
-                        paddingLeft: '100px',  // Añade un padding izquierdo para evitar que las tarjetas queden cortadas en móviles
-                        paddingRight: '900px'
-                      }}
-                >
-                    {cards.map((card, index) => (
-                        <div key={index} className="w-60 flex-shrink-0" onClick={() => onCardClick(card.owner)}>
-                            <CardPreview card={card} />
-                        </div>
-                    ))}
-                </div>
+        <div className="flex flex-col items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 justify-items-center">
+                {testCardData.cards.map((card, index) => (
+                    <div key={index} className="w-full sm:w-auto">
+                        <CardPreview card={card} />
+                    </div>
+                ))}
             </div>
 
-            {/* Botón de navegación hacia adelante */}
-            <button
-                onClick={handleNext}
-                disabled={currentIndex === cards.length - 1 && !hasMore}
-                className=" p-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 z-10 hidden-on-mobile"
-            >
-                ▶
-            </button>
+            {/* Botones de paginación */}
+            <div className="flex justify-center gap-4 mt-4">
+                <button
+                    onClick={handlePrevPage}
+                    disabled={page === 0}
+                    className="p-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 rounded-md"
+                >
+                    Anterior
+                </button>
+                <button
+                    onClick={handleNextPage}
+                    disabled={!hasMore && startIndex + PAGE_SIZE >= cards.length}
+                    className="p-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 rounded-md"
+                >
+                    Siguiente
+                </button>
+            </div>
         </div>
-        
     );
 };
-
 export default CardCarousel;

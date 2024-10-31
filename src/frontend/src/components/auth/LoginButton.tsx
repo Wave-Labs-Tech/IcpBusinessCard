@@ -6,7 +6,8 @@ const LoginButton: React.FC = () => {
     const { login } = useContext(AuthContext);
 
     return (
-        <button translate="no" className="button" onClick={login}>Log in</button>
+        <button className="button" onClick={login}>Log in</button>
+        // <button className="bg-stone-100" onClick={login}>Log in</button>
     );
 };
 

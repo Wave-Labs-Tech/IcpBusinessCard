@@ -5,10 +5,6 @@ import Header from './components/Header';
 import { UserProfile } from './components/userProfile/UserProfile';
 import { AuthContext } from './context/AuthContext';
 import CardCarousel from './components/CardCarousel';
-import { Principal } from "@dfinity/principal"
-import { CompleteCardData } from './declarations/backend/backend.did';
-import CardDetails from './components/CardDetails';
-
 
 function App() {
   const { isAuthenticated, backend, identity, cardDataUser } = useContext(AuthContext);
@@ -79,39 +75,59 @@ function App() {
 
     fetchWhoAmI();
   }, [isAuthenticated, backend, whoAmI]);
-
+  
   return (
-    <div className="App flex flex-col min-h-screen w-full">
-      <Header/>
-      {/* <NavBar/> */}
+    <div className="App">
+      
+      {/*<header className="App-header">*/}
+      <header className="App-header">
+        <div className="header-title">ICP Business Card</div>
+        {isAuthenticated ? <LogoutButton /> : <LoginButton />}
+      </header>
 
-      {isAuthenticated ? ( !cardDataUser &&
-        <div>
+     
+
+      {/* <div className="additional-info">Tarjetas Públicas</div> */}
+      <div className="bg-stone-100 text-green-600 font-bold text-xl m-auto mt-12 mb-4 py-2 px-20 rounded-md shadow-2xl">
+        Tarjetas Públicas</div>
+
+      {/* Carrusel de tarjetas */}
+      
+        
+      <div className="flex justify-center mt-4">
+        <CardCarousel 
+          cards={cards}
+          fetchCards={getPaginatePublicCards}
+          hasMore={hasMore}
+        />
+      </div>
+      {isAuthenticated ? (
+        <div className="flex flex-col items-center place-content-center mt-24">
           <UserProfile />
+          <hr className="w-3/5 border-t-2 border-green-600 mt-12" />
+            <p className="w-fit text-green-600 font-bold bg-stone-100 mt-8 mb-4 py-1 px-20 rounded-md shadow-2xl">
+              User Principal ID: </p>
+           
+          <div className="w-fit text-green-600 font-bold bg-stone-100 mb-8 py-2 px-20 rounded-md shadow-2xl">{whoAmI}</div>
+          <hr className="w-3/5 border-t-2 border-green-600 mb-4" />
         </div>
       ) : null}
-      {selectedCard ? (
-        <CardDetails {...selectedCard}
-          isOpen={true}
-          onClose={handleBackToCarousel}
-        />
-      ) :
-        (<div>
-          {cards.length > 0 && (<div className="additional-info">Tarjetas Públicas</div>)}
-          <div className="flex justify-center mt-4">
-            <CardCarousel
-              cards={cards}
-              fetchCards={getPaginatePublicCards}
-              hasMore={hasMore}
-              onCardClick={handleCardClick}
-            />
-          </div>
+      <a
+        // className="link"
+        className="text-green-600 font-bold  bg-stone-100 m-auto mt-12 mb-32 py-2 px-20 rounded-md shadow-2xl"
+                href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jkmf4-caaaa-aaaal-amq3q-cai"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Enlace a la interfaz candid del Backend
+      </a>
 
-        </div>)}
-        
       <footer className="App-footer">
-        <ul className="footer-links md:h-[35px] ">
-          <li><a href="https://wave-labs.tech/">Wave Labs Tech Web Site</a></li>
+        <div className="footer-title">Wave Lab Tech</div>
+        <ul className="footer-links">
+          <li><a href="https://www.linkedin.com/company/wavelabs-tech/">Wave-Labs Linkedin</a></li>
+          <li><a href="https://wave-labs.tech">Wave-Labs web</a></li>
+          {/* <li><a href="#">Link 3</a></li> */}
         </ul>
       </footer>
     </div>

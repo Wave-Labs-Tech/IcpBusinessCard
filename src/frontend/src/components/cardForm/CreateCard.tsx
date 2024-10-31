@@ -24,12 +24,14 @@ const CreateCard: React.FC<CreateCardProps> = ({ onFormSubmit }) => {
     return (
         <div>
             {!showForm && (
-                <button className="button" onClick={handleCreateCardClick}>Create Card</button>
+                // <button className="button" onClick={handleCreateCardClick}>
+                <button className="w-120 bg-green-300 rounded-md py-3 px-32" onClick={handleCreateCardClick}>
+                    Create Card</button>
             )}
 
             {showForm && (
-                <div>
-                    <h2>Create Your Business Card</h2>
+                <div className="flex flex-col items-center place-content-center">
+                    <h2 className="w-fit text-green-600 font-bold bg-stone-100 mt-12 mb-4 py-2 px-20 rounded-md shadow-2xl">Create Your Business Card</h2>
                     <FormComponent onSubmit={handleFormSubmit} /> {/* Pasamos handleFormSubmit como prop */}
                 </div>
             )}
