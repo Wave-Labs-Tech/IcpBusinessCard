@@ -9,8 +9,6 @@ dfx canister call backend createCard '( record {
     phone = 54223687945;
     profession = "Motoko Dev";
     skils = vec {"Backend"; "Motoko"; "software architecture"};
-    visiblePositions = true;
-    positions = vec {};
     links = vec {"www.linkedin.com/ariel_robotti"};
 })'
 ```

@@ -72,7 +72,7 @@ shared ({ caller }) actor class BusinessCard () = this {
             contactRequests= Set.new<Principal>();
             requestsEmployee: [Position] = [];
             score = 0;
-            rewiews: [Text] = [];
+            reviews: [Text] = [];
             historyLog = [];
             visiblePositions = false;
             positions: [Position] = [];
@@ -273,17 +273,20 @@ shared ({ caller }) actor class BusinessCard () = this {
         #Ok
     };
 
-    // public shared ({ caller }) func addCertificate(c: Certificate):async {#Ok; #Err} {
-    //     let card = Map.get<Principal, Card>(cards, phash, caller);
-    //     switch card {
-    //         case null { #Err };
-    //         case ( ?card ) {
-
-    //         }
-    //     }
-    //     title: Text;
-    //     url: ?Text;
-    // };
+    public shared ({ caller }) func addCertificate(c: Certificate):async {#Ok; #Err} {
+        let card = Map.get<Principal, Card>(cards, phash, caller);
+        switch card {
+            case null { #Err };
+            case ( ?card ) {
+                let certificates = Prim.Array_tabulate<Certificate>(
+                   card.certificates.size() +1,
+                   func x = if(x == 0){ c } else { card.certificates[x - 1]}
+                );
+                ignore Map.put<Principal, Card>(cards, phash, caller, {card with certificates});
+                #Ok
+            }
+        }
+    };
 
   ///////////////////////////////////////// Getters ///////////////////////////////////////////
   
@@ -300,7 +303,7 @@ shared ({ caller }) actor class BusinessCard () = this {
                 switch callerCard {
                     case null {#Ok({ pCard with
                             contactQty = Set.size(pCard.contacts);
-                            email = "***********************";
+                            email = "Private access";
                             phone = 0;
                         })
                     };
@@ -310,7 +313,7 @@ shared ({ caller }) actor class BusinessCard () = this {
                             caller != p) { 
                             return #Ok({ pCard with
                                 contactQty = Set.size(pCard.contacts);
-                                email = "***********************";
+                                email = "Private access";
                                 phone = 0;
                             });
                         };

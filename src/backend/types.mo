@@ -10,7 +10,7 @@ module {
         photo: Blob; //Foto original hasta 1.5 MB 
         photoPreview: Blob; //Foto reducida para previsualización < 64Kb
         profession: Text;
-        skils: [Text];
+        skills: [Text];
         links: [Text]
     };
 
@@ -23,7 +23,7 @@ module {
         contacts: Set.Set<Principal>;
         contactRequests: Set.Set<Principal>;
         score: Nat;
-        rewiews: [Text];
+        reviews: [Text];
         visiblePositions: Bool;
         positions: [Position];
         historyLog: [EventId];
@@ -40,6 +40,9 @@ module {
 
     public type Certificate = {
         title: Text;
+        institution: Text;
+        date: Int;
+        expirationDate: ?Int;
         url: ?Text;
     };
 
@@ -52,10 +55,10 @@ module {
         name: Text;
         photo: Blob;
         profession: Text;
-        skils: [Text];
+        skills: [Text];
         positions: [Position];
         score: Nat;
-        rewiews: [Text];
+        reviews: [Text];
         contactQty: Nat;
         links: [Text];
         certificates: [Certificate]
@@ -71,7 +74,7 @@ module {
         name: Text;
         photoPreview: Blob; //Foto reducida para previsualización < 64Kb
         profession: Text;
-        skils: [Text];
+        skills: [Text];
         positions: [Position];
         certificates: [Certificate]
     };
@@ -108,6 +111,7 @@ module {
     };
      public type Position = {
         startDate: Int;
+        endDate: ?Int;
         company: CompanyId; 
         position: Text
     };
