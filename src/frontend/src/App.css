@@ -9,6 +9,7 @@
   min-height: 100vh; /* Asegura que la altura mínima de la App ocupe toda la pantalla */
   display: flex;
   flex-direction: column;
+  padding-bottom: 100px;
 }
 
 .App-footer, .App-header {
@@ -60,8 +61,8 @@
 }
 
 .footer-title {
-  font-size: 1.3rem;
-  margin-bottom: 5px;
+  font-size: 1.2rem;
+  margin-bottom: 2px;
 }
 
 .footer-links {
@@ -92,7 +93,7 @@
     font-size: 1.5rem;
   }
   .footer-title {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
   .App-header button, .App-footer {
     font-size: 0.8rem;

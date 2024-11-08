@@ -6,6 +6,9 @@ import LogoutButton from './components/auth/LogoutButton';
 import { UserProfile } from './components/userProfile/UserProfile';
 import { AuthContext } from './context/AuthContext';
 import CardCarousel from './components/CardCarousel';
+import { Principal } from "@dfinity/principal"
+import { CompleteCardData } from './declarations/backend/backend.did';
+import CardDetails from './components/CardDetails';
 
 function App() {
   const { isAuthenticated, backend, identity } = useContext(AuthContext);
@@ -13,6 +16,8 @@ function App() {
   const [cards, setCards] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);  // Estado para controlar si hay más tarjetas para cargar
   const [initialLoad, setInitialLoad] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<CompleteCardData | null>(null);
+
   let canisterId: string | undefined = process.env.REACT_APP_CANISTER_ID_BACKEND;
 
   if (!canisterId) {
@@ -32,6 +37,23 @@ function App() {
       }
     }
   }, [backend]);
+
+  const fetchCardDetails = async (owner: Principal) => {
+    try {
+      const response = await backend.getCardByPrincipal(owner);
+      if ("Ok" in response) {
+        setSelectedCard(response.Ok); // Guarda los datos completos de la tarjeta en el estado
+      } else {
+        console.error("Error al obtener los detalles de la tarjeta:", response.Err);
+      }
+    } catch (error) {
+      console.error("Error al llamar a getCardByPrincipal:", error);
+    }
+  };
+
+  const handleCardClick = (owner: Principal) => {
+    fetchCardDetails(owner);
+  };
 
   useEffect(() => {
     if (!initialLoad) {
@@ -68,29 +90,30 @@ function App() {
           <div style={{ fontSize: '0.8rem' }}>{whoAmI}</div>
         </div>
       ) : null}
+      {selectedCard ? (
+        <CardDetails {...selectedCard} />
+      ) :
+        (<div>
+          <div className="additional-info">Tarjetas Públicas</div>
 
-      <div className="additional-info">Tarjetas Públicas</div>
+          <a
+            className="link"
+            href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jkmf4-caaaa-aaaal-amq3q-cai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Interfase candid del Backend
+          </a>
+          <div className="flex justify-center mt-4">
+            <CardCarousel
+              cards={cards}
+              fetchCards={getPaginatePublicCards}
+              hasMore={hasMore}
+              onCardClick={handleCardClick}
+            />
+          </div>
 
-      {/* Carrusel de tarjetas */}
-      
-        
-      <a
-        className="link"
-        href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jkmf4-caaaa-aaaal-amq3q-cai"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Interfase candid del Backend
-      </a>
-      <div className="flex justify-center mt-4">
-        <CardCarousel 
-          cards={cards}
-          fetchCards={getPaginatePublicCards}
-          hasMore={hasMore}
-        />
-      </div>
-      
-
+        </div>)}
       <footer className="App-footer">
         <div className="footer-title">Wave Lab Tech</div>
         <ul className="footer-links">

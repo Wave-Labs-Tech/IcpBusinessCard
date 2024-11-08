@@ -12,7 +12,7 @@ type FormData = {
     photo: Uint8Array | null;
     photoPreview: Uint8Array | null;
     profession: Text;
-    skils: Text[];
+    skills: Text[];
     links: Text[];
 };
 
@@ -30,7 +30,7 @@ const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
         photo: null,
         photoPreview: null,
         profession: "",
-        skils: [],
+        skills: [],
         links: []
     });
 
@@ -155,8 +155,8 @@ const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
                 <span className="text-gray-700">Skills:</span>
                 <textarea
                     name="skills"
-                    value={formData.skils.join(", ")}
-                    onChange={(e) => setFormData({ ...formData, skils: e.target.value.split(", ") })}
+                    value={formData.skills.join(", ")}
+                    onChange={(e) => setFormData({ ...formData, skills: e.target.value.split(", ") })}
                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>

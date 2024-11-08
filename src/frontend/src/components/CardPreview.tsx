@@ -7,7 +7,7 @@ interface CardPreviewProps {
         name: string;
         photoPreview: Uint8Array; // Cambiado a Uint8Array
         profession: string;
-        skils: string[];
+        skills: string[];
         positions: any[];
         certificates: any[];
     };
@@ -46,7 +46,7 @@ const CardPreview: React.FC<CardPreviewProps> = ({ card }) => {
         <div className="mt-2">
             <h4 className="text-xs font-semibold text-green-400">Skills:</h4>
             <ul className="text-xs text-gray-300 list-disc list-inside">
-                {card.skils.slice(0, 3).map((skill, index) => (
+                {card.skills.slice(0, 3).map((skill, index) => (
                     <li key={index}>{skill}</li>
                 ))}
             </ul>

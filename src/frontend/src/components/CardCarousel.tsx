@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import CardPreview from './CardPreview';
+import { Principal } from "@dfinity/principal";
 
 interface CardCarouselProps {
     cards: any[];
     fetchCards: (startIndex: number) => Promise<void>;
     hasMore: boolean;
+    onCardClick: (owner: Principal) => void;
 }
 
-const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore }) => {
+const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore, onCardClick }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [page, setPage] = useState(0)
     const startX = useRef(0); // Posición inicial en X cuando empieza el toque
@@ -78,7 +80,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore 
                       }}
                 >
                     {cards.map((card, index) => (
-                        <div key={index} className="w-60 flex-shrink-0">
+                        <div key={index} className="w-60 flex-shrink-0" onClick={() => onCardClick(card.owner)}>
                             <CardPreview card={card} />
                         </div>
                     ))}
