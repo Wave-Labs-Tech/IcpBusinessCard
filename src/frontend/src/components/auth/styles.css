@@ -18,3 +18,33 @@
     box-shadow: 3px 3px 10px rgba(221, 218, 59, 0.945);
     background-color: #4a79dd; /* Color de fondo al pasar el mouse */    
 }
+
+/* CustomModal.css */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    color: rgb(70, 228, 136);
+    font-size: large;
+    display: flex;
+    flex-direction: column;
+    background: rgb(39, 51, 66);
+    padding: 20px;
+    width: 400px;
+    height: 500px;
+    max-width: 90%;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+}

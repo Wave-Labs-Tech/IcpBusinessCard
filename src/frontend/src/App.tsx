@@ -55,6 +55,10 @@ function App() {
     fetchCardDetails(owner);
   };
 
+  const handleBackToCarousel = () => {
+    setSelectedCard(null);
+  };
+
   useEffect(() => {
     if (!initialLoad) {
       getPaginatePublicCards(0);

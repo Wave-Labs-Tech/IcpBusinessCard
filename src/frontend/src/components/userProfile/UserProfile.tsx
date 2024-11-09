@@ -16,12 +16,9 @@ export function UserProfile() {
     const fetchCardData = async () => {
       if (isAuthenticated && backend) {
         try {
-          // Hacemos la llamada al backend y casteamos la respuesta al tipo adecuado
           const response = await backend.getMyCard();
-          console.log("From UserProfile backend.getMyCard() ", response)
-
           if ('Ok' in response) {
-            setCardData(response.Ok);  // Si es Ok, actualizamos cardData con los datos de la tarjeta
+            setCardData(response.Ok);
           } else {      
             setError("Card not found");
           }

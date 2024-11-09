@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import FormComponent from './FormComponent';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../../components/auth/Button.css';
+import '../../components/auth/styles.css';
 
 type CreateCardProps = {
     onFormSubmit: () => void;
