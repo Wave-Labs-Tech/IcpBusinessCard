@@ -7,6 +7,8 @@ import Principal "mo:base/Principal";
 import Buffer "mo:base/Buffer";
 import Prim "mo:⛔";
 
+// import { print } "mo:base/Debug";
+
 shared ({ caller }) actor class BusinessCard () = this {
   ////////////////////////////// Types declarations ///////////////////////////////////////////
   // Interactions
@@ -39,7 +41,18 @@ shared ({ caller }) actor class BusinessCard () = this {
     stable var updateLockTime: Int = 43_200_000_000_000; // 12 horas en nanosegundos;
 
 
-  
+  ////////////////// Only controllers ///////////////////////////////////////////
+  // TODO BackUp
+  public shared ({ caller }) func hardReset(code: Nat): async (){
+    assert(Principal.isController(caller) and code == 8754987548745);
+    Map.clear<Principal, Card>(cards);
+    Set.clear<Principal>(publicCards);
+    Map.clear<Principal, CompanyId>(companiesId);
+    Map.clear<CompanyId, Company>(companies);
+    lastCompanyId := 0;
+    updateLockTime := 43_200_000_000_000;
+  };
+
   /////////////////////////////// Private Functions ///////////////////////////////////////////
 
     Set.add<Principal>(admins, phash, caller);
@@ -58,7 +71,9 @@ shared ({ caller }) actor class BusinessCard () = this {
         }
     };
 
-    // func isAdmin
+    func isAdmin(p: Principal): Bool {
+        Set.has<Principal>(admins, phash, p) 
+    };
 
     func safeCreateCard(init: CardDataInit, owner: Principal, creator: Principal): {#Ok: CardPublicData; #Err: Text} {
         if(hasCard(owner)){ return #Err("The caller already has a card associated")};
@@ -91,9 +106,26 @@ shared ({ caller }) actor class BusinessCard () = this {
 
   ////////////////////////////////// Only admins //////////////////////////////////////////////
 
-    // public shared ({ caller }) func addAdmin(a: Principal): async Bool {
+    public shared ({ caller }) func addAdmin(a: Principal): async Bool {
+        assert(isAdmin(caller));
+        ignore Set.put<Principal>(admins, phash, a);
+        true
+    };
 
-    // };
+    public shared ({ caller }) func removeCardByPrincipal({user: Principal}): async {#Ok: CardPublicData; #Err: Text} {
+        assert(isAdmin(caller));
+        let card = Map.remove<Principal, Card>(cards, phash, user);
+        switch card {
+            case null {
+                #Err("User not have a Card");
+            };
+            case (?card) {
+                ignore Set.remove<Principal>(publicCards, phash, user);
+                // TODO Limpieza extra garbage collector(p: Principal) solo mantener historial de interacciones con otros usuarios
+                #Ok({card with contactQty = Set.size(card.contacts)});
+            }
+        }
+    };
   
   ///////////////////////////// Create elements and setters funcions //////////////////////////
 
@@ -425,7 +457,5 @@ shared ({ caller }) actor class BusinessCard () = this {
             }
         }
     };
-
-
 
 };
