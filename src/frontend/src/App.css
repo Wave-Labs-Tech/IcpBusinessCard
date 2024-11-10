@@ -57,7 +57,7 @@
   bottom: 0;
   width: 100%;
   text-align: center;
-  z-index: 1000; /* Asegura que el footer esté siempre en la parte superior de otros elementos */
+  /* z-index: 1000;  */
 }
 
 .footer-title {

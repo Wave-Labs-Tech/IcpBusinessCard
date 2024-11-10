@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 // import { backend } from '../../declarations/backend';
-import {CompleteCardData} from "../../declarations/backend/backend.did";
+import { CompleteCardData } from "../../declarations/backend/backend.did";
 import CreateCard from "../cardForm/CreateCard";
+import FormModal from '../cardForm/FormModal';
 
 
 export function UserProfile() {
@@ -11,6 +12,7 @@ export function UserProfile() {
   const [error, setError] = useState<string | null>(null);  // Estado para los errores
   const [loading, setLoading] = useState(true);  // Estado para controlar el spinner de carga
   const [formSuccess, setFormSuccess] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchCardData = async () => {
@@ -19,7 +21,7 @@ export function UserProfile() {
           const response = await backend.getMyCard();
           if ('Ok' in response) {
             setCardData(response.Ok);
-          } else {      
+          } else {
             setError("Card not found");
           }
         } catch (err) {
@@ -33,11 +35,15 @@ export function UserProfile() {
     };
 
     fetchCardData();
-  }, [isAuthenticated, identity, backend, formSuccess ]);
+  }, [isAuthenticated, identity, backend, formSuccess]);
 
   const handleFormSuccess = () => {
     setFormSuccess(true);
+    setIsFormModalOpen(false);
   };
+
+  const openFormModal = () => setIsFormModalOpen(true);
+  const closeFormModal = () => setIsFormModalOpen(false);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -56,7 +62,14 @@ export function UserProfile() {
             </div>
           ) : (
             <div>
-              <CreateCard onFormSubmit={handleFormSuccess} />
+              <button onClick={openFormModal} className="bg-blue-500 text-white py-2 px-4 rounded">
+                Create Card
+              </button>
+              <FormModal
+                isOpen={isFormModalOpen}
+                onClose={closeFormModal}
+                onSubmit={handleFormSuccess}
+              />
             </div>
           )}
         </div>

@@ -1,8 +1,5 @@
-// CustomModal.tsx
-
 import React from 'react';
-import './styles.css'; // Importa los estilos CSS
-
+// import './styles.css'; 
 interface CustomModalProps {
     isOpen: boolean;
     onClose: () => void;

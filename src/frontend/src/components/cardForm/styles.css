@@ -1,0 +1,69 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.575);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0);
+    position: fixed;
+    top: 30px;
+    /* width: 100vw; */
+    height: 90vh;
+    border-radius: 8px;
+    padding: 0px;
+    width: 70%;
+    max-width: 500px;
+}
+.modal {
+    background: rgba(25, 26, 27, 0.849);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: #bde4b6;
+    width: 100%;
+    max-width: 600px;
+    color: black;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="file"],
+.phone,
+textarea {
+    background-color: #2e2d2dad; /* Fondo oscuro */
+    color: #ffffff; /* Texto blanco */
+    border: 1px solid #555555; /* Borde gris oscuro */
+    border-radius: 4px;
+    width: 100%;
+    margin-bottom: 5px;
+    height: 45px;
+}
+
+textarea {
+    height: auto;
+}
+input[type="phone"] {
+    width: 80%;
+}
+/* input[type="file"] {
+    display: none;
+} */
+
+/* Estilo para el botón personalizado */
+.custom-file-upload {
+    background-color: #007bff; /* Mismo color que el botón de submit */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+}

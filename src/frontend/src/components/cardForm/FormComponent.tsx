@@ -1,5 +1,6 @@
-import React, { useState, ChangeEvent, FormEvent, useContext} from 'react';
-import {AuthContext} from "../../context/AuthContext"
+import React, { useState, ChangeEvent, FormEvent, useContext } from 'react';
+import 'react-phone-input-2/lib/style.css';
+import { AuthContext } from "../../context/AuthContext"
 import { resizeImage } from "../../utils/imageUtils";
 
 type Text = string;
@@ -20,7 +21,7 @@ interface FormComponentProps {
     onSubmit: () => void;
 }
 
-const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
+const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
     const { backend } = useContext(AuthContext);
 
     const [formData, setFormData] = useState<FormData>({
@@ -74,8 +75,8 @@ const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
         e.preventDefault();
         const validPhoto = formData.photo || new Uint8Array();
         const validPhotoPreview = formData.photoPreview || new Uint8Array();
-        const dataToSend = { 
-            ...formData, 
+        const dataToSend = {
+            ...formData,
             photo: validPhoto,
             photoPreview: validPhotoPreview
         };
@@ -84,7 +85,7 @@ const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
                 const result = await backend.whoAmI(); // Reemplaza `someFunction` con tu método
                 console.log("From FormComponnet: backend.whoAmI():", result);
                 let resultCreateCard = await backend.createCard(dataToSend);
-                console.log("FormComponnet: ",resultCreateCard);
+                console.log("FormComponnet: ", resultCreateCard);
                 // console.log("From FormComponent createCard(): ", resultCreateCard);
                 // console.log("From FormComponent createCard(): ", await backend.getMyCard());
             } catch (error) {
@@ -94,80 +95,85 @@ const FormComponent: React.FC<FormComponentProps>  = ({ onSubmit }) => {
         } else {
             console.warn("FormComponent: No hay backend disponible, asegúrate de que el usuario esté autenticado.");
         }
-        
+
     };
 
     return (
-        <form onSubmit={handleFormSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-md space-y-4">
-            <h2 className="text-2xl font-semibold text-center">Formulario de Usuario</h2>
+        <form onSubmit={handleFormSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-md space-y-1 modal">
+            <h2 className="text-xl sm:text-2xl text-gray-200 font-semibold text-center">Crear Business Card</h2>
 
-            <label className="block">
-                <span className="text-gray-700">Name:</span>
+            <label className="block text-left">
+                <span className="text-gray-200 text-[12px]">Name:</span>
                 <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    className="block w-full p-2 border border-gray-300 rounded-md"
+                    required
                 />
             </label>
 
-            <label className="block">
-                <span className="text-gray-700">Email:</span>
+            <label className="block text-left">
+                <span className="text-gray-200 text-[12px]">Email:</span>
                 <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    className="block w-full p-2 border border-gray-300 rounded-md"
+                    required
                 />
             </label>
 
-            <label className="block">
-                <span className="text-gray-700">Phone:</span>
-                <input
-                    type="number"
-                    name="phone"
-                    value={formData.phone.toString()}
-                    onChange={handlePhoneChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                />
+            <label className="block text-left">
+                <span className="text-gray-200 text-[12px]">Phone: (Optional)</span>
+                <span className="phone w-[50px] text-black font-semibold bg-white block w-full p-2 border border-gray-300 rounded-md "> +
+                    <input
+                        type="phone"
+                        name="phone"
+                        value={formData.phone.toString()}
+                        onChange={handlePhoneChange}
+                        className=" font-normal ml-2 bg-[#2e2d2dad]"
+                    />
+                </span>
             </label>
 
-            <label className="block">
-                <span className="text-gray-700">Photo (max 1.5 MB):</span>
-                <input type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full"/>
-                {photoError && <p className="text-red-500 text-sm mt-1">{photoError}</p>}
+            <label className="block text-left ">
+                <span className="text-gray-200 text-[12px]">Photo (max 1.5 MB):</span>
+                <input type="file" accept="image/*" onChange={handleFileChange} className=" block w-full  text-[12px] " />
+                {photoError && <p className="text-red-500 text-sm">{photoError}</p>}
             </label>
 
-            <label className="block">
-                <span className="text-gray-700">Profession:</span>
+            <label className="block text-left">
+                <span className="text-gray-200 text-[12px]">Profession:</span>
                 <input
                     type="text"
                     name="profession"
                     value={formData.profession}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    className="block w-full p-2 border border-gray-300 rounded-md"
+                    required
                 />
             </label>
 
-            <label className="block">
-                <span className="text-gray-700">Skills:</span>
+            <label className="block text-left">
+                <span className="text-gray-200 text-[12px]">Skills:</span>
                 <textarea
                     name="skills"
                     value={formData.skills.join(", ")}
                     onChange={(e) => setFormData({ ...formData, skills: e.target.value.split(", ") })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    className="block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
-            
-            <label className="block">
-                <span className="text-gray-700">Links:</span>
+
+            <label className="block text-left">
+                <span className="text-gray-200 text-[12px]">Links:</span>
                 <textarea
                     name="links"
                     value={formData.links.join(", ")}
                     onChange={(e) => setFormData({ ...formData, links: e.target.value.split(", ") })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    className="block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>
 
