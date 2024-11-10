@@ -1,5 +1,5 @@
 import React from 'react';
-// import './styles.css'; 
+import './styles.css'; 
 interface CustomModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -13,7 +13,7 @@ const ModalProviderSelect: React.FC<CustomModalProps> = ({ isOpen, onClose, onSe
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content-providers" onClick={(e) => e.stopPropagation()}>
                 <h2 className='mb-8'>Elige un Proveedor de Identidad</h2>
                 <button className="button" onClick={() => onSelectProvider(internetIdentityUrl)}>Internet Identity</button>
                 <button className="button"  onClick={() => onSelectProvider("https://nfid.one/authenticate/?applicationName=my-ic-app")}>NFID</button>
