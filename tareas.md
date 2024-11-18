@@ -20,6 +20,16 @@ Nota especial: Para el caso de una expansion futura en la cual un usuario pueda 
 
 
 
+1.- Conexión y aceptación por las parte
+2.- Cambiar : Skill x “Descripción Servicio y/o producto”
+3.- Front : Editar Perfíl
+4.- Cambiar Carrusel por tablero tipo opensea.
+5.-  En Crear Tarjeta agregar : Sector / Subsector
+6.- Buscador en Tablero como filtros : Nombre || Sector || SubSector || Texto abierto que busca en “Descripción Servicio y/o producto”
+7.- Front : Notificaciones de Conexión
+8.- Agregar Botón “Desconectar”, cuando se seleccione un contacto que es conexión, y fue un “error”.
+
+
 
 
 

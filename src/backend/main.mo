@@ -6,8 +6,9 @@ import { phash; nhash} "mo:map/Map";
 import Principal "mo:base/Principal";
 import Buffer "mo:base/Buffer";
 import Prim "mo:⛔";
+import ChatManager "chat";
 
-// import { print } "mo:base/Debug";
+import { print } "mo:base/Debug";
 
 shared ({ caller }) actor class BusinessCard () = this {
   ////////////////////////////// Types declarations ///////////////////////////////////////////
@@ -29,6 +30,7 @@ shared ({ caller }) actor class BusinessCard () = this {
         #Err: Text;
     };
     type CardPreview = Types.CardPreview;
+    type Notification = Types.Notification;
 
   //////////////////////////// storage and utility variables //////////////////////////////////
 
@@ -39,6 +41,11 @@ shared ({ caller }) actor class BusinessCard () = this {
     stable let publicCards = Set.new<Principal>();
     stable var lastCompanyId = 0;
     stable var updateLockTime: Int = 43_200_000_000_000; // 12 horas en nanosegundos;
+
+    stable let notifications = Map.new<Principal, [Notification]>();
+
+    stable let chatManager: ChatManager.ChatManager = actor("aaa-aaaaa");
+    // Inicializar chatManager
 
 
   ////////////////// Only controllers ///////////////////////////////////////////
@@ -75,7 +82,7 @@ shared ({ caller }) actor class BusinessCard () = this {
         Set.has<Principal>(admins, phash, p) 
     };
 
-    func safeCreateCard(init: CardDataInit, owner: Principal, creator: Principal): {#Ok: CardPublicData; #Err: Text} {
+    func safeCreateCard(init: CardDataInit, owner: Principal, creator: Principal): {#Ok: CompleteCardData; #Err: Text} {
         if(hasCard(owner)){ return #Err("The caller already has a card associated")};
         let newCard: Card = {
             init with
@@ -98,7 +105,8 @@ shared ({ caller }) actor class BusinessCard () = this {
         if(owner != creator){
             ignore Set.put<Principal>(newCard.contactRequests, phash, creator);
         };
-        let publicData: CardPublicData = { newCard with
+        let publicData: CompleteCardData = { newCard with
+            relationWithCaller = #Self;
             contactQty = 0;
         };
         #Ok(publicData);
@@ -122,7 +130,7 @@ shared ({ caller }) actor class BusinessCard () = this {
             case (?card) {
                 ignore Set.remove<Principal>(publicCards, phash, user);
                 // TODO Limpieza extra garbage collector(p: Principal) solo mantener historial de interacciones con otros usuarios
-                #Ok({card with contactQty = Set.size(card.contacts)});
+                #Ok({card with relationWithCaller = #None; contactQty = Set.size(card.contacts)});
             }
         }
     };
@@ -151,7 +159,7 @@ shared ({ caller }) actor class BusinessCard () = this {
         #Ok(lastCompanyId)
     };
 
-    public shared ({ caller }) func createCard(init: CardDataInit): async {#Ok: CardPublicData; #Err: Text} {
+    public shared ({ caller }) func createCard(init: CardDataInit): async {#Ok: CompleteCardData; #Err: Text} {
         assert(not Principal.isAnonymous(caller));
         safeCreateCard(init, caller, caller);
     };
@@ -159,7 +167,7 @@ shared ({ caller }) actor class BusinessCard () = this {
 
   /////////////////////////// Funciones exclusivas de perfiles de Empresa //////////////////////
 
-    public shared ({ caller }) func createCardFor(init: CardDataInit, owner: Principal): async {#Ok: CardPublicData; #Err: Text} {   
+    public shared ({ caller }) func createCardFor(init: CardDataInit, owner: Principal): async {#Ok: CompleteCardData; #Err: Text} {   
         let companId = Map.get<Principal, CompanyId>(companiesId, phash, caller);
         switch companId {
             case null {
@@ -209,6 +217,7 @@ shared ({ caller }) actor class BusinessCard () = this {
                                 );
                                 let publicData: CardPublicData = { 
                                     cardEmploy with 
+                                    relationWithCaller = #EmployedRequired;
                                     positions = if(cardEmploy.visiblePositions){cardEmploy.positions} else {[]};
                                     contactQty = Set.size(cardEmploy.contacts);
                                 };
@@ -274,6 +283,7 @@ shared ({ caller }) actor class BusinessCard () = this {
                 ignore Map.put<Principal, Card>(cards, phash, caller, updateCard);
                 let publicDataCard: CardPublicData = {
                     updateCard with 
+                    relationWithCaller = #Self;
                     positions = if(card.visiblePositions) {card.positions} else {[]};
                     contactQty = Set.size(card.contacts);
                 };
@@ -326,6 +336,31 @@ shared ({ caller }) actor class BusinessCard () = this {
         Principal.toText(caller);
     };
 
+    func getRelationshipAtoB(a: Principal, b: Principal): Types.Relation {
+        let cardA = Map.get<Principal,Card>(cards, phash, a);
+        switch cardA {
+            case null { #None };
+            case ( ?cardA ) {
+                if (a == b ) { return #Self };
+                let cardB = Map.get<Principal,Card>(cards, phash, b);
+                switch cardB {
+                    case null { #None };
+                    case ( ?cardB ) {
+                        if(Set.has<Principal>(cardA.contacts, phash, cardB.owner)) {
+                            #Contact
+                        } else if (Set.has<Principal>(cardA.contactRequests, phash, cardB.owner)) {
+                            #ContactInvited
+                        } else if (Set.has<Principal>(cardB.contactRequests, phash, cardA.owner)) {
+                            #ContactRequester;
+                        } else {
+                            #None
+                        }
+                    }
+                }
+            }
+        }
+    };
+
     public query ({ caller }) func getCardByPrincipal(p: Principal): async {#Ok: CompleteCardData; #Err: Text} {
         let pCard = Map.get<Principal, Card>(cards, phash, p);
         switch pCard {
@@ -334,16 +369,19 @@ shared ({ caller }) actor class BusinessCard () = this {
                 let callerCard = Map.get<Principal, Card>(cards, phash, caller);
                 switch callerCard {
                     case null {#Ok({ pCard with
+                            relationWithCaller = #None;
                             contactQty = Set.size(pCard.contacts);
                             email = "Private access";
                             phone = 0;
                         })
                     };
                     case (?callerCard){
-                        if(not Set.has<Principal>(pCard.contacts, phash, caller) and
-                            not Set.has<Principal>(callerCard.contactRequests, phash, p) and
-                            caller != p) { 
+                        let relationWithCaller = getRelationshipAtoB(p, caller);
+                        if(relationWithCaller == #Contact or 
+                            relationWithCaller == #ContactInvited or 
+                            relationWithCaller == #Self) { 
                             return #Ok({ pCard with
+                                relationWithCaller;
                                 contactQty = Set.size(pCard.contacts);
                                 email = "Private access";
                                 phone = 0;
@@ -351,6 +389,7 @@ shared ({ caller }) actor class BusinessCard () = this {
                         };
                         #Ok({
                             pCard with
+                            relationWithCaller;
                             contactQty = Set.size(pCard.contacts);
                             positions = if(pCard.visiblePositions) {pCard.positions} else {[]};
                         })
@@ -366,7 +405,8 @@ shared ({ caller }) actor class BusinessCard () = this {
             case null { #Err };
             case (?card){
                 #Ok({
-                    card with 
+                    card with
+                    relationWithCaller = #Self;
                     contactQty = Set.size(card.contacts);
                 });
             }
@@ -392,6 +432,8 @@ shared ({ caller }) actor class BusinessCard () = this {
             }
         }
     };
+
+    // public shared query ({ caller }) func seeRelationship(p: Principal)
 
     public query func getPaginatePublicCards(page: Nat): async GetPublicCardsResult{
         if(Set.size<Principal>(publicCards) < page * 10){
@@ -429,9 +471,33 @@ shared ({ caller }) actor class BusinessCard () = this {
         }
     };
   
+  ////////////////////////////////////// Notifications ////////////////////////////////////////
+    func pushNotification(n: Notification, to: Principal) {
+        let notificationArray = Map.get<Principal, [Notification]>(notifications, phash, to);
+        switch notificationArray{
+            case null{
+                let notificationArrayInit = [n];
+                ignore Map.put<Principal, [Notification]>(notifications, phash, to, notificationArrayInit)
+            };
+            case (?notificationArray) {
+                let notificationArrayUpdate = Prim.Array_tabulate<Notification>(
+                    notificationArray.size() + 1,
+                    func x = if( x == 0) { n } else {notificationArray[x-1]}
+                );
+                ignore Map.put<Principal, [Notification]>(notifications, phash, to, notificationArrayUpdate)
+            }
+        };  
+    };
+
+    public shared query ({ caller }) func getMyNotifications(): async [Notification]{
+        switch (Map.get<Principal, [Notification]>(notifications, phash, caller)){
+            case null {[]};
+            case (?notificArray) { notificArray }
+        }
+    };
   ///////////////////////////// Interaction functions between cards ///////////////////////////
     
-    public shared ({ caller }) func shareCard(p: Principal):async  {#Ok; #Err: Text} {
+    public shared ({ caller }) func shareCard(p: Principal):async  {#Ok: Types.Relation; #Err: Text} {
         if(caller == p) {return #Err("You cannot share your card with yourself")};
         let callerCard = Map.get<Principal, Card>(cards, phash, caller);
         switch callerCard {
@@ -447,11 +513,26 @@ shared ({ caller }) actor class BusinessCard () = this {
                         if(Set.has<Principal>(callerCard.contactRequests, phash, p)){
                             ignore Set.put<Principal>(pCard.contacts, phash, caller);
                             ignore Set.put<Principal>(callerCard.contacts, phash, p);
-                            ignore Set.remove<Principal>(callerCard.contactRequests, phash, p);   
+                            ignore Set.remove<Principal>(callerCard.contactRequests, phash, p);
+
+                            ///// Push Notification //////////
+                            let notification: Notification = #ContactAccepted({
+                                date = now();
+                                acceptor = {name = callerCard.name; principal = caller}
+                            });
+                            pushNotification(notification, p);
+                            /////////////////////////////////
                         } else {
                             ignore Set.put<Principal>(pCard.contactRequests, phash, caller);
+                            ///// Push Notification //////////
+                            let notification: Notification = #ContactRequest({
+                                date = now();
+                                requester = {name = callerCard.name; principal = caller}
+                            });
+                            pushNotification(notification, p);
+                            /////////////////////////////////
                         };
-                        return #Ok;     
+                        return #Ok(getRelationshipAtoB(caller, p));     
                     }
                 }
             }

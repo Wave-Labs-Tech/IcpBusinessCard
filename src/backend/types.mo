@@ -50,10 +50,20 @@ module {
         
     // };
 
+    public type Relation = {
+        #None;
+        #Self;
+        #ContactRequester;
+        #ContactInvited;
+        #Contact;
+        #EmployedRequired;
+    };
+
     public type CardPublicData = {
         owner: Principal;
         name: Text;
         photo: Blob;
+        photoPreview: Blob;
         profession: Text;
         skills: [Text];
         positions: [Position];
@@ -61,7 +71,8 @@ module {
         reviews: [Text];
         contactQty: Nat;
         links: [Text];
-        certificates: [Certificate]
+        certificates: [Certificate];
+        relationWithCaller: Relation;
     };
     public type CompleteCardData = CardPublicData and {
         requestsEmployee: [Position];
@@ -115,6 +126,17 @@ module {
         company: CompanyId; 
         position: Text
     };
+
+    public type User = {
+        name: Text;
+        principal: Principal;
+    };
+
+    public type Notification = {
+        #Msg: {date: Int; sender: User};
+        #ContactRequest: {date: Int; requester: User };
+        #ContactAccepted: {date: Int; acceptor: User}
+    }
 
     
 }
