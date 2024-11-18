@@ -1,8 +1,7 @@
 /* eslint-disable array-callback-return */
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import './App.css';
-import LoginButton from './components/auth/LoginButton';
-import LogoutButton from './components/auth/LogoutButton';
+import Header from './components/Header';
 import { UserProfile } from './components/userProfile/UserProfile';
 import { AuthContext } from './context/AuthContext';
 import CardCarousel from './components/CardCarousel';
@@ -10,8 +9,9 @@ import { Principal } from "@dfinity/principal"
 import { CompleteCardData } from './declarations/backend/backend.did';
 import CardDetails from './components/CardDetails';
 
+
 function App() {
-  const { isAuthenticated, backend, identity } = useContext(AuthContext);
+  const { isAuthenticated, backend, identity, cardDataUser } = useContext(AuthContext);
   const [whoAmI, setWhoAmI] = useState(identity.getPrincipal().toText());
   const [cards, setCards] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);  // Estado para controlar si hay más tarjetas para cargar
@@ -81,33 +81,23 @@ function App() {
   }, [isAuthenticated, backend, whoAmI]);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <div className="header-title">ICP Business Card</div>
-        {isAuthenticated ? <LogoutButton /> : <LoginButton />}
-      </header>
+    <div className="App flex flex-col min-h-screen w-full">
+      <Header/>
+      {/* <NavBar/> */}
 
-      {isAuthenticated ? (
+      {isAuthenticated ? ( !cardDataUser &&
         <div>
           <UserProfile />
-          <div>User Principal ID: </div>
-          <div style={{ fontSize: '0.8rem' }}>{whoAmI}</div>
         </div>
       ) : null}
       {selectedCard ? (
-        <CardDetails {...selectedCard} />
+        <CardDetails {...selectedCard}
+          isOpen={true}
+          onClose={handleBackToCarousel}
+        />
       ) :
         (<div>
-          <div className="additional-info">Tarjetas Públicas</div>
-
-          <a
-            className="link"
-            href="https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=jkmf4-caaaa-aaaal-amq3q-cai"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Interfase candid del Backend
-          </a>
+          {cards.length > 0 && (<div className="additional-info">Tarjetas Públicas</div>)}
           <div className="flex justify-center mt-4">
             <CardCarousel
               cards={cards}
@@ -118,12 +108,10 @@ function App() {
           </div>
 
         </div>)}
+        
       <footer className="App-footer">
-        <div className="footer-title">Wave Lab Tech</div>
-        <ul className="footer-links">
-          <li><a href="#">Link 1</a></li>
-          <li><a href="#">Link 2</a></li>
-          <li><a href="#">Link 3</a></li>
+        <ul className="footer-links md:h-[35px] ">
+          <li><a href="https://wave-labs.tech/">Wave Labs Tech Web Site</a></li>
         </ul>
       </footer>
     </div>

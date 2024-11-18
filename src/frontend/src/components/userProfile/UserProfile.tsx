@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-// import { backend } from '../../declarations/backend';
 import { CompleteCardData } from "../../declarations/backend/backend.did";
-import CreateCard from "../cardForm/CreateCard";
 import FormModal from '../cardForm/FormModal';
+
 
 
 export function UserProfile() {
   const { isAuthenticated, identity, backend } = useContext(AuthContext);  // Accede a la autenticación
   const [cardData, setCardData] = useState<CompleteCardData | null>(null);  // Estado para los datos de la tarjeta
-  const [error, setError] = useState<string | null>(null);  // Estado para los errores
   const [loading, setLoading] = useState(true);  // Estado para controlar el spinner de carga
   const [formSuccess, setFormSuccess] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -21,13 +19,10 @@ export function UserProfile() {
           const response = await backend.getMyCard();
           if ('Ok' in response) {
             setCardData(response.Ok);
-          } else {
-            setError("Card not found");
-          }
+          } 
         } catch (err) {
           setCardData(null)
           console.error("Error fetching card data:", err);
-          setError("An error occurred");
         } finally {
           setLoading(false);
         }
@@ -54,15 +49,14 @@ export function UserProfile() {
       {isAuthenticated && (
         <div>
           {cardData ? (
-            <div>
-              <h1>My Card</h1>
-              <p>Name: {cardData.name}</p>
-              <p>Email: {cardData.email}</p>
-              {/* <p>Contacts: {cardData.contactQty}</p> */}
+            <div className='md:flex md:text-[12px] justify-left mt-1 text-left text-[11px]'>
+              <p className='mx-2'>{cardData.name}</p>
+              <p className='mx-2'>{cardData.email}</p>
+              <p className='mx-2'>{cardData.owner.toString()}</p>
             </div>
           ) : (
             <div>
-              <button onClick={openFormModal} className="bg-blue-500 text-white py-2 px-4 rounded">
+              <button onClick={openFormModal} className="bg-blue-600 mt-3 text-white py-2 px-4 rounded">
                 Create Card
               </button>
               <FormModal

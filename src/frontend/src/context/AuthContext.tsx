@@ -4,7 +4,7 @@ import React, { createContext, ReactNode, useEffect, useState } from 'react';
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Identity, AnonymousIdentity, ActorSubclass } from "@dfinity/agent";
 import { createActor } from "../declarations/backend";
-import { _SERVICE } from "../declarations/backend/backend.did";
+import { _SERVICE, CompleteCardData, Notification } from "../declarations/backend/backend.did";
 import ModalProviderSelect from '../components/auth/ModalProviderSelect';
 
 const canisterId = process.env.REACT_APP_DFX_NETWORK === 'ic'
@@ -16,19 +16,25 @@ const host = process.env.REACT_APP_DFX_NETWORK === "local" ? "http://localhost:4
 interface AuthContextProps {
     isAuthenticated: boolean;
     identity: Identity;
+    cardDataUser: CompleteCardData | null;
+    // notifications: Notification[] | null;
     backend: ActorSubclass<_SERVICE>;
     login: () => void;
     logout: () => Promise<void>;
+    updateCardDataUser: (cardData: CompleteCardData) => void;
 }
 
 const defaultAuthContext: AuthContextProps = {
     isAuthenticated: false,
     identity: new AnonymousIdentity(),
+    cardDataUser: null,
+    // notifications: null,
     backend: createActor(canisterId, {
         agentOptions: { identity: new AnonymousIdentity(), host }
     }),
     login: () => {},
     logout: async () => {},
+    updateCardDataUser: (cardData: CompleteCardData) => {},
 };
 
 export const AuthContext = createContext<AuthContextProps>(defaultAuthContext);
@@ -36,11 +42,13 @@ export const AuthContext = createContext<AuthContextProps>(defaultAuthContext);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [identity, setIdentity] = useState<Identity>(new AnonymousIdentity());
+    const [cardDataUser, setCardDataUser] = useState<CompleteCardData | null>(null);
     const [backend, setBackend] = useState<ActorSubclass<_SERVICE>>(
         createActor(canisterId, {
             agentOptions: { identity: new AnonymousIdentity(), host }
         })
     );
+    const [notifications, setNotifications] = useState<Notification[]|null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
 
     useEffect(() => {
@@ -54,9 +62,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 host,
             });
             setBackend(createActor(canisterId, { agent }));
+              
         };
         setupAgent();
     }, [identity]);
+
+    useEffect(() => {
+        const getUser = async () => {
+            let dataUser = await backend.getMyCard();
+            if("Ok" in dataUser) {
+                setCardDataUser(dataUser.Ok)
+            } else {
+                setCardDataUser(null)
+            }
+        };
+        getUser()
+    }, [isAuthenticated, backend] );
+
+    // useEffect( () => {
+    //     const getNotifications = async () => {
+    //         if(cardDataUser) {
+    //             let n = await backend.getMyNotifications();
+    //             if(n) { setNotifications(n) }
+    //             console.log(cardDataUser.name, n)
+    //         } else { 
+    //             setNotifications(null) 
+    //         }
+    //     };
+    //     console.log(notifications)
+    //     if (cardDataUser && !notifications){ getNotifications()}
+        
+    // }, [backend, cardDataUser, isAuthenticated, notifications]);
 
     async function init() {
         const authClient = await AuthClient.create();
@@ -88,8 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const handleProviderSelection = async (providerUrl: string) => {
-        setIsModalOpen(false); // Cierra el modal
-        await login(providerUrl); // Llama a `login` con el proveedor seleccionado
+        setIsModalOpen(false);      // Cierra el modal
+        await login(providerUrl);   // Llama a `login` con el proveedor seleccionado
     };
 
     const logout = async () => {
@@ -104,8 +140,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
     };
 
+    const updateCardDataUser = (data: CompleteCardData) => {
+        setCardDataUser(data)
+    }
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, identity, backend, login: handleLoginClick, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, identity, cardDataUser, backend, login: handleLoginClick, logout, updateCardDataUser  }}>
             {children}
             <ModalProviderSelect 
                 isOpen={isModalOpen} 

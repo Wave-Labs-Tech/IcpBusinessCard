@@ -15,8 +15,8 @@
 .App-footer, .App-header {
   background-color: #011830ce;
   color: #EAD8B1;
-  min-height: 30px;
-  padding: 10px;
+  min-height: 20px;
+  padding: 0px 10px 0px 10px;
 }
 
 .App-header {
@@ -34,7 +34,7 @@
 }
 
 .additional-info {
-  margin-top: 100px;
+  margin-top: 50px;
   font-size: 2rem;
   text-align: center;
 }
@@ -46,6 +46,13 @@
   text-align: center;
   color: #007bff;
   text-decoration: none;
+}
+
+.spinner {
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+  border-top-color: #ffffff;
 }
 
 .link:hover {
@@ -90,7 +97,7 @@
 /* Media query para dispositivos móviles */
 @media (max-width: 768px) {
   .header-title {
-    font-size: 1.5rem;
+    font-size: 4vw;
   }
   .footer-title {
     font-size: 0.8rem;

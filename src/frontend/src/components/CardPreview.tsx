@@ -35,24 +35,24 @@ const CardPreview: React.FC<CardPreviewProps> = ({ card }) => {
 
     return (
         <button type="button" className="transition-transform duration-300 transform hover:scale-105">
-    <div className="bg-gray-800 shadow-lg rounded-lg p-4 m-2 flex flex-col items-center w-60 h-80 border border-gray-700 hover:border-green-500 transition-colors duration-300">
-        {photoUrl ? (
-            <img src={photoUrl} alt={`${card.name} preview`} className="w-24 h-24 rounded-full object-cover mb-4 border-2 border-green-500 shadow-md" />
-        ) : (
-            <div className="w-24 h-24 bg-gray-700 rounded-full mb-4 border-2 border-gray-600" />
-        )}
-        <h3 className="text-lg font-semibold text-green-300">{card.name}</h3>
-        <p className="text-sm text-gray-400">{card.profession}</p>
-        <div className="mt-2">
-            <h4 className="text-xs font-semibold text-green-400">Skills:</h4>
-            <ul className="text-xs text-gray-300 list-disc list-inside">
-                {card.skills.slice(0, 3).map((skill, index) => (
-                    <li key={index}>{skill}</li>
-                ))}
-            </ul>
-        </div>
-    </div>
-</button>
+            <div className="bg-gray-800 shadow-lg rounded-lg p-4 m-2 flex flex-col items-center w-60 h-80 border border-gray-700 hover:border-green-500 transition-colors duration-300">
+                {photoUrl ? (
+                    <img src={photoUrl} alt={`${card.name} preview`} className="w-24 h-24 rounded-full object-cover mb-4 border-2 border-green-500 shadow-md" />
+                ) : (
+                    <div className="w-24 h-24 bg-gray-700 rounded-full mb-4 border-2 border-gray-600" />
+                )}
+                <h3 className="text-lg font-semibold text-green-300">{card.name}</h3>
+                <p className="text-sm text-gray-400">{card.profession}</p>
+                <div className="mt-2">
+                    <h4 className="text-xs font-semibold text-green-400">Descripción de Servicio:</h4>
+                    <ul className="text-xs text-gray-300 list-disc list-inside">
+                        {card.skills.slice(0, 3).map((skill, index) => (
+                            <li key={index}>{skill}</li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        </button>
     );
 };
 
