@@ -2,13 +2,13 @@ create Card
 
 ``` 
 dfx canister call backend createCard '( record {
-    name = "Usuario B";
+    name = "BBBBBB DFX CLI";
     email = "arielrobotti@gmail.com";
     photo = blob "00/11/22/33/44/55/66/77/88/99";
     photoPreview = blob "00/11/22/33/44";
     phone = 54223687945;
-    profession = "Motoko Dev";
-    skills = vec {"Backend"; "Motoko"; "software architecture"};
+    profession = "Beta tester de consola";
+    keyWords = vec {"DFX CLI"; "Motoko"; "software architecture"};
     links = vec {"www.linkedin.com/ariel_robotti"};
 })'
 ```

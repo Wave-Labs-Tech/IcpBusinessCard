@@ -2,6 +2,9 @@
   "backend": {
     "ic": "jkmf4-caaaa-aaaal-amq3q-cai"
   },
+  "chat": {
+    "ic": "vsmby-7aaaa-aaaal-arsva-cai"
+  },
   "frontend": {
     "ic": "ihcbs-niaaa-aaaal-amq4a-cai"
   }

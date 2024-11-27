@@ -4,6 +4,7 @@
       "type": "pull",
       "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
     },
+
     "backend": {
       "main": "src/backend/main.mo",
       "type": "motoko",

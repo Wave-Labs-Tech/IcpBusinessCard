@@ -6,9 +6,10 @@ import { phash; nhash} "mo:map/Map";
 import Principal "mo:base/Principal";
 import Buffer "mo:base/Buffer";
 import Prim "mo:⛔";
-import ChatManager "chat";
+import ChatManager "./chat/chat";
 
 import { print } "mo:base/Debug";
+import Array "mo:base/Array";
 
 shared ({ caller }) actor class BusinessCard () = this {
   ////////////////////////////// Types declarations ///////////////////////////////////////////
@@ -18,6 +19,7 @@ shared ({ caller }) actor class BusinessCard () = this {
     type CompanyId = Nat;
     type Position = Types.Position;
     type CardDataInit = Types.CardDataInit;
+    type Sector = Types.Sector;
     type Card = Types.Card;
     type CardPublicData = Types.CardPublicData;
     type CompleteCardData = Types.CompleteCardData;
@@ -26,7 +28,7 @@ shared ({ caller }) actor class BusinessCard () = this {
     type Id = Nat;
     type CreateResult = { #Ok: Id; #Err: Text };
     type GetPublicCardsResult = {
-        #Ok: {cardsPreview: [CardPreview]; thereIsMore: Bool};
+        #Ok: {cardsPreview: [CardPreview]; hasMore: Bool};
         #Err: Text;
     };
     type CardPreview = Types.CardPreview;
@@ -44,9 +46,22 @@ shared ({ caller }) actor class BusinessCard () = this {
 
     stable let notifications = Map.new<Principal, [Notification]>();
 
-    stable let chatManager: ChatManager.ChatManager = actor("aaa-aaaaa");
-    // Inicializar chatManager
+    public type ChatManager = ChatManager.ChatManager;
 
+    stable var chatManager: ChatManager = actor("aaaaa-aa");
+    // Inicializar chatManager
+    public shared ({ caller }) func initChatManager(): async Principal{
+        assert(Principal.isController(caller) and Principal.fromActor(chatManager) == Principal.fromText("aaaaa-aa"));
+        Prim.cyclesAdd<system>(300_000_000_000);
+        chatManager := await ChatManager.ChatManager();
+
+        let userNamesBufferToSend = Buffer.Buffer<{p:Principal; name: Text}>(0);
+        for( (p, card) in Map.entries<Principal, Card>(cards)){
+            userNamesBufferToSend.add({p; name = card.name})
+        };
+        chatManager.updateUsers(Buffer.toArray(userNamesBufferToSend));
+        Principal.fromActor(chatManager)
+    };
 
   ////////////////// Only controllers ///////////////////////////////////////////
   // TODO BackUp
@@ -86,6 +101,8 @@ shared ({ caller }) actor class BusinessCard () = this {
         if(hasCard(owner)){ return #Err("The caller already has a card associated")};
         let newCard: Card = {
             init with
+            bio = "";
+            sector: [Sector] = [];
             owner;
             creator;
             lastModifiedDate = now();
@@ -99,6 +116,9 @@ shared ({ caller }) actor class BusinessCard () = this {
             visiblePositions = false;
             positions: [Position] = [];
             certificates: [Certificate] = [];
+            emailVerified = false;
+            phoneVerified = false;
+            kyc = false;
         };
         ignore Map.put<Principal, Card>(cards, phash, owner, newCard);
         ignore Set.put<Principal>(publicCards, phash, owner);
@@ -106,6 +126,7 @@ shared ({ caller }) actor class BusinessCard () = this {
             ignore Set.put<Principal>(newCard.contactRequests, phash, creator);
         };
         let publicData: CompleteCardData = { newCard with
+            contactRequests = [];
             relationWithCaller = #Self;
             contactQty = 0;
         };
@@ -161,7 +182,12 @@ shared ({ caller }) actor class BusinessCard () = this {
 
     public shared ({ caller }) func createCard(init: CardDataInit): async {#Ok: CompleteCardData; #Err: Text} {
         assert(not Principal.isAnonymous(caller));
-        safeCreateCard(init, caller, caller);
+        let result = safeCreateCard(init, caller, caller);
+        switch result {
+            case (#Ok(_)) { chatManager.addUser(caller, init.name) };
+            case (_) {  }
+        };
+        result
     };
 
 
@@ -292,6 +318,34 @@ shared ({ caller }) actor class BusinessCard () = this {
         }
     };
 
+    public shared ({ caller }) func changeEmail(email: Text): async {#Ok; #Err: Text}{
+        let card = Map.get<Principal, Card>(cards, phash, caller);
+        switch card {
+            case null { #Err("There is no card associated with the caller")};
+            case ( ?card ){
+                if(now() < card.lastModifiedDate + updateLockTime){
+                    return #Err("The last update was very recent, you must wait");
+                };
+                ignore Map.put<Principal, Card>(cards, phash, caller, {card with email; emailVerified = false});
+                #Ok
+            }
+        } 
+    };
+
+    public shared ({ caller }) func changePhone(phone: Nat): async {#Ok; #Err: Text}{
+        let card = Map.get<Principal, Card>(cards, phash, caller);
+        switch card {
+            case null { #Err("There is no card associated with the caller")};
+            case ( ?card ){
+                if(now() < card.lastModifiedDate + updateLockTime){
+                    return #Err("The last update was very recent, you must wait");
+                };
+                ignore Map.put<Principal, Card>(cards, phash, caller, {card with phone; phoneVerified = false});
+                #Ok
+            }
+        } 
+    };
+
     public shared ({ caller }) func setPositionVisibility(visiblePositions: Bool):async  Bool {
         let card = Map.get<Principal, Card>(cards, phash, caller);
         switch card {
@@ -336,6 +390,10 @@ shared ({ caller }) actor class BusinessCard () = this {
         Principal.toText(caller);
     };
 
+    public query func getChatManagerCanisterId(): async Principal{
+        Principal.fromActor(chatManager)
+    };
+
     func getRelationshipAtoB(a: Principal, b: Principal): Types.Relation {
         let cardA = Map.get<Principal,Card>(cards, phash, a);
         switch cardA {
@@ -369,6 +427,7 @@ shared ({ caller }) actor class BusinessCard () = this {
                 let callerCard = Map.get<Principal, Card>(cards, phash, caller);
                 switch callerCard {
                     case null {#Ok({ pCard with
+                            contactRequests = [];
                             relationWithCaller = #None;
                             contactQty = Set.size(pCard.contacts);
                             email = "Private access";
@@ -381,14 +440,35 @@ shared ({ caller }) actor class BusinessCard () = this {
                             relationWithCaller == #ContactInvited or 
                             relationWithCaller == #Self) { 
                             return #Ok({ pCard with
+                                contactRequests = [];
                                 relationWithCaller;
                                 contactQty = Set.size(pCard.contacts);
                                 email = "Private access";
                                 phone = 0;
                             });
                         };
+                        if(relationWithCaller == #Self) {
+                            let recBuffer = Buffer.fromArray<{principal: Principal; name: Text}>([]);
+                            for(r in Set.toArray(pCard.contactRequests).vals()){
+                                switch(Map.get<Principal, Card>(cards, phash, r)) {
+                                    case null {};
+                                    case (?card) {
+                                      recBuffer.add({principal = r; name = card.name})  
+                                    }
+                                }
+                            };
+                            return #Ok({ pCard with
+                                contactRequests = Buffer.toArray(recBuffer);
+                                relationWithCaller;
+                                contactQty = Set.size(pCard.contacts);
+                                email = "Private access";
+                                phone = 0;
+                            });
+                        };
+
                         #Ok({
                             pCard with
+                            contactRequests = [];
                             relationWithCaller;
                             contactQty = Set.size(pCard.contacts);
                             positions = if(pCard.visiblePositions) {pCard.positions} else {[]};
@@ -404,8 +484,18 @@ shared ({ caller }) actor class BusinessCard () = this {
         switch card {
             case null { #Err };
             case (?card){
+                let recBuffer = Buffer.fromArray<{principal: Principal; name: Text}>([]);
+                for(r in Set.toArray(card.contactRequests).vals()){
+                    switch(Map.get<Principal, Card>(cards, phash, r)) {
+                        case null {};
+                        case (?cardRec) {
+                            recBuffer.add({principal = r; name = cardRec.name})  
+                        }
+                    }
+                };
                 #Ok({
                     card with
+                    contactRequests = Buffer.toArray(recBuffer);
                     relationWithCaller = #Self;
                     contactQty = Set.size(card.contacts);
                 });
@@ -436,13 +526,14 @@ shared ({ caller }) actor class BusinessCard () = this {
     // public shared query ({ caller }) func seeRelationship(p: Principal)
 
     public query func getPaginatePublicCards(page: Nat): async GetPublicCardsResult{
-        if(Set.size<Principal>(publicCards) < page * 10){
+        let cardsPerPage = 16;
+        if(Set.size<Principal>(publicCards) < page * cardsPerPage){
             return #Err("Pagination index out of range")
         };
         let arrayCardsOwners = Set.toArray<Principal>(publicCards);
         let bufferPreviewCards = Buffer.fromArray<CardPreview>([]);
-        var index = page * 10;
-        while (index < arrayCardsOwners.size() and index < (page + 1) * 10){
+        var index = page * cardsPerPage;
+        while (index < arrayCardsOwners.size() and index < (page + 1) * cardsPerPage){
             let card = Map.get<Principal, Card>(cards, phash, arrayCardsOwners[index]);
             switch card {
                 case null {};
@@ -457,8 +548,8 @@ shared ({ caller }) actor class BusinessCard () = this {
             };
             index += 1;
         };
-        let thereIsMore = arrayCardsOwners.size() > (page + 1) * 10;
-        #Ok({cardsPreview = Buffer.toArray<CardPreview>(bufferPreviewCards); thereIsMore}) 
+        let hasMore = arrayCardsOwners.size() > (page + 1) * cardsPerPage;
+        #Ok({cardsPreview = Buffer.toArray<CardPreview>(bufferPreviewCards); hasMore}) 
     };
 
     public query func getCompanyById(id: Nat): async {#Ok: Company; #Err: Text} {
@@ -489,12 +580,31 @@ shared ({ caller }) actor class BusinessCard () = this {
         };  
     };
 
+    public shared ({ caller }) func pushNotificationFromChatCanister(n: Notification, users: [Principal]): async {#Ok; #Err}{
+        assert(caller == Principal.fromActor(chatManager));
+        for (user in users.vals()){
+            pushNotification(n, user);
+        };
+        #Ok
+    };
+
     public shared query ({ caller }) func getMyNotifications(): async [Notification]{
-        switch (Map.get<Principal, [Notification]>(notifications, phash, caller)){
+        getNotificationsByPrincipal(caller)
+    };
+
+    func getNotificationsByPrincipal(p: Principal): [Notification] {
+        switch (Map.get<Principal, [Notification]>(notifications, phash, p)){
             case null {[]};
             case (?notificArray) { notificArray }
         }
     };
+
+    public shared ({ caller }) func removeNotification(date: Int): async (){
+        let arrayNotifications = getNotificationsByPrincipal(caller);
+        let updateNotific = Array.filter<Notification>(arrayNotifications, func n = n.date != date);
+        ignore Map.put<Principal, [Notification]>(notifications, phash, caller, updateNotific)       
+    };
+
   ///////////////////////////// Interaction functions between cards ///////////////////////////
     
     public shared ({ caller }) func shareCard(p: Principal):async  {#Ok: Types.Relation; #Err: Text} {
@@ -516,19 +626,27 @@ shared ({ caller }) actor class BusinessCard () = this {
                             ignore Set.remove<Principal>(callerCard.contactRequests, phash, p);
 
                             ///// Push Notification //////////
-                            let notification: Notification = #ContactAccepted({
+                            // let notification: Notification = #ContactAccepted({
+                            //     date = now();
+                            //     acceptor = {name = callerCard.name; principal = caller}
+                            // });
+                            let notification: Notification = {
                                 date = now();
-                                acceptor = {name = callerCard.name; principal = caller}
-                            });
+                                kind = #ContactAccepted({principal = caller; name = callerCard.name})
+                            };
                             pushNotification(notification, p);
                             /////////////////////////////////
                         } else {
                             ignore Set.put<Principal>(pCard.contactRequests, phash, caller);
                             ///// Push Notification //////////
-                            let notification: Notification = #ContactRequest({
+                            // let notification: Notification = #ContactRequest({
+                            //     date = now();
+                            //     requester = {name = callerCard.name; principal = caller}
+                            // });
+                            let notification: Notification = {
                                 date = now();
-                                requester = {name = callerCard.name; principal = caller}
-                            });
+                                kind = #ContactRequest({principal = caller; name = callerCard.name})
+                            };
                             pushNotification(notification, p);
                             /////////////////////////////////
                         };
