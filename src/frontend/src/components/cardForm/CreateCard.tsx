@@ -25,7 +25,7 @@ const CreateCard: React.FC<CreateCardProps> = ({ onFormSubmit }) => {
         <div>
             {!showForm && (
                 // <button className="button" onClick={handleCreateCardClick}>
-                <button className="w-120 bg-green-300 rounded-md py-3 px-32" onClick={handleCreateCardClick}>
+                <button className="w-120 bg-green-300 text-green-800 rounded-md py-3 px-32" onClick={handleCreateCardClick}>
                     Create Card</button>
             )}
 

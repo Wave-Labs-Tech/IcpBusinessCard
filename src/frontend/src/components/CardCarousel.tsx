@@ -23,15 +23,15 @@ interface Owner {
     toJSON: () => { principal: string };
 }
 
-interface Card {
-    owner: Owner;
-    name: string;
-    profession: string;
-    certificates: any[];
-    photoPreview: Uint8Array | null;
-    positions: any[];
-    skils: string[];
-}
+// interface Card {
+//     owner: Owner;
+//     name: string;
+//     profession: string;
+//     certificates: any[];
+//     photoPreview: Uint8Array | null;
+//     positions: any[];
+//     skils: string[];
+// }
 
 
 // Ejemplo de datos de prueba con tres tarjetas en un array
@@ -39,30 +39,26 @@ const testCardData = {
     cards: [
         {
             owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
+            name: "Steve McQueen",
+            profession: "Actor",
+            photoPreview: "blob:http://localhost:3000/f766b7a8-15ef-4d46-b3c2-5fa0b35cafb0",
+            skils: ["Western", "Acción"]
+        },
+        {
+            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
             name: "Gary Cooper",
             profession: "Actor",
-            certificates: [],
-            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
-            positions: [],
-            skils: ["Drama", "comedia"]
+            photoPreview: "blob:http://localhost:3000/cb115d25-d0b8-4466-b1b2-15833cb9360e",
+            skils: ["Drama", "Comedia"]
         },
         {
             owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
-            name: "Gary Cooper 2",
+            name: "James Stewart",
             profession: "Actor",
             certificates: [],
-            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
+            photoPreview: "blob:http://localhost:3000/04e9b4fb-51d6-446f-b5bb-d8531d01d89f",
             positions: [],
-            skils: ["Drama", "comedia"]
-        },
-        {
-            owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
-            name: "Gary Cooper 3",
-            profession: "Actor",
-            certificates: [],
-            photoPreview: new Uint8Array([255, 216, 255, 224, /* más bytes aquí */]),
-            positions: [],
-            skils: ["Drama", "comedia"]
+            skils: ["Drama", "Comedia", "Suspense"]
         },
         {
             owner: "owner-principal-text", // Llamamos al método .toText() y guardamos el valor aquí
@@ -178,7 +174,8 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore 
     return (
         <div className="flex flex-col items-center">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 justify-items-center">
-                {testCardData.cards.map((card, index) => (
+                {/* {testCardData.cards.map((card, index) => ( */}
+                {paginatedCards.map((card, index) => (
                     <div key={index} className="w-full sm:w-auto">
                         <CardPreview card={card} />
                     </div>

@@ -23,6 +23,7 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
     });
 
     const [photoError, setPhotoError] = useState<string | null>(null);
+    const [compressedPreviewUrl, setCompressedPreviewUrl] = useState<any | null>(null); // URL de la vista previa de la foto comprimida
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -32,16 +33,27 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
-            let resizeFile = await resizeImage(file, 100);
-            let resizeThumbnail = await resizeImage(file, 5);
-            const photo = new Uint8Array(await resizeFile.arrayBuffer());
-            let thumnailPhoto = new Uint8Array(await resizeThumbnail.arrayBuffer());
-            setFormData({
-                ...formData,
-                photo: photo,
-                photoPreview: thumnailPhoto,
-            });
-            setPhotoError(null);
+            if (file.size > 1.5 * 1024 * 1024) {
+                setPhotoError("El tamaño de la foto no debe superar los 1.5 MB"); // Se puede redimensionar directamente
+            } else {
+                try {
+                    const photo = new Uint8Array(await file.arrayBuffer());
+                    let resizeFile = await resizeImage(file, 120);
+                    let thumnailPhoto = new Uint8Array(await resizeFile.arrayBuffer());
+                    setCompressedPreviewUrl(URL.createObjectURL(new Blob([thumnailPhoto], {type: 'image/jpeg'})));
+                    console.log("IAMGE", (URL.createObjectURL(new Blob([thumnailPhoto], {type: 'image/jpeg'}))))
+                    console.log("Thumnail", thumnailPhoto);
+                    setFormData({
+                        ...formData,
+                        photo: photo,
+                        photoPreview: thumnailPhoto,
+                    });
+                    setPhotoError(null);
+                } catch (error) {
+                    console.error("Error al procesar el archivo:", error);
+                    setPhotoError("Error al procesar el archivo.");
+                }
+            }
         }
     };
 
@@ -76,124 +88,188 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
 
     };
 
-    const handleLinkSocialChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+    // return (
+    //     <form onSubmit={handleFormSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-md space-y-4">
+    //         <h2 className="text-2xl font-semibold text-center">Formulario de Usuario</h2>
 
-        // Separar valores de Links y Social Networks
-        const linksArray = name === "links" ? value.split(",").map((link) => `Link: ${link.trim()}`) :
-            formData.links.filter(link => link.startsWith("Link:"));
+    //         <label className="block">
+    //             <span className="text-gray-700">Name:</span>
+    //             <input
+    //                 type="text"
+    //                 name="name"
+    //                 value={formData.name}
+    //                 onChange={handleInputChange}
+    //                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+    //             />
+    //         </label>
 
-        const socialArray = name === "social" ? value.split(",").map((social) => `Social: ${social.trim()}`) :
-            formData.links.filter(link => link.startsWith("Social:"));
+    //         <label className="block">
+    //             <span className="text-gray-700">Email:</span>
+    //             <input
+    //                 type="email"
+    //                 name="email"
+    //                 value={formData.email}
+    //                 onChange={handleInputChange}
+    //                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+    //             />
+    //         </label>
 
-        // Actualizar formData con ambos arrays combinados
-        setFormData((prevData) => ({
-            ...prevData,
-            links: [...linksArray, ...socialArray],
-        }));
-    };
+    //         <label className="block">
+    //             <span className="text-gray-700">Phone:</span>
+    //             <input
+    //                 type="number"
+    //                 name="phone"
+    //                 value={formData.phone.toString()}
+    //                 onChange={handlePhoneChange}
+    //                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+    //             />
+    //         </label>
 
+    //         <label className="block">
+    //             <span className="text-gray-700">Photo (max 1.5 MB):</span>
+    //             <input type="file" accept="image/*" onChange={handleFileChange} className="mt-1 block w-full"/>
+    //             {photoError && <p className="text-red-500 text-sm mt-1">{photoError}</p>}
+    //         </label>
+
+    //         <label className="block">
+    //             <span className="text-gray-700">Profession:</span>
+    //             <input
+    //                 type="text"
+    //                 name="profession"
+    //                 value={formData.profession}
+    //                 onChange={handleInputChange}
+    //                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+    //             />
+    //         </label>
+
+    //         <label className="block">
+    //             <span className="text-gray-700">Skills:</span>
+    //             <textarea
+    //                 name="skills"
+    //                 value={formData.skils.join(", ")}
+    //                 onChange={(e) => setFormData({ ...formData, skils: e.target.value.split(", ") })}
+    //                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+    //             />
+    //         </label>
+            
+    //         <label className="block">
+    //             <span className="text-gray-700">Links:</span>
+    //             <textarea
+    //                 name="links"
+    //                 value={formData.links.join(", ")}
+    //                 onChange={(e) => setFormData({ ...formData, links: e.target.value.split(", ") })}
+    //                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+    //             />
+    //         </label>
+
+    //         <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300">
+    //             Submit
+    //         </button>
+    //     </form>
+    // );
+    console.log("Comp. photo: ", compressedPreviewUrl);
     return (
-        <form onSubmit={handleFormSubmit} className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-md space-y-1 modal">
-            <h2 className="text-xl sm:text-2xl text-gray-200 font-semibold text-center">Crear Business Card</h2>
-
-            <label className="block text-left">
-                <span className="text-gray-200 text-[12px]">Name:</span>
-                <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="block w-full p-2 border border-gray-300 rounded-md"
-                    required
+        <div className="w-full max-w-2xl flex m-auto mb-12 text-green-800">
+    <form className="w-full max-w-full bg-white shadow-md rounded px-20 py-4" onSubmit={handleFormSubmit}>
+        {/* Campo name */}
+        <div className="mb-4 w-full">
+        <label className="block text-sm font-bold mb-2">
+            Name:
+            <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 text-lg leading-tight focus:outline-none focus:shadow-outline"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+            />
+        </label>
+        </div>
+        <div className="mb-4">
+        {/* Campo profession */}
+        <label className="block text-sm font-bold mb-2">
+            Profession:
+            <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 text-lg leading-tight focus:outline-none focus:shadow-outline"
+                type="text"
+                name="profession"
+                value={formData.profession}
+                onChange={handleInputChange}
+            />
+        </label>
+        </div>
+        {/* Campo skills */}
+        <div className="mb-4">
+        <label className="block text-sm font-bold mb-2">
+            Skills:
+            <textarea
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 text-lg leading-tight focus:outline-none focus:shadow-outline"
+                name="skills"
+                value={formData.skils.join(", ")}
+                onChange={(e) => setFormData({ ...formData, skils: e.target.value.split(", ") })}
                 />
-            </label>
+        </label>
+                </div>
+        {/* Campo email */}
+        <div className="mb-4">
+        <label className="block text-sm font-bold mb-2">
+            Email:
+            <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 text-lg leading-tight focus:outline-none focus:shadow-outline"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+            />
+        </label>
+                </div>
 
-            <label className="block text-left">
-                <span className="text-gray-200 text-[12px]">Profession:</span>
-                <input
-                    type="text"
-                    name="profession"
-                    value={formData.profession}
-                    onChange={handleInputChange}
-                    className="block w-full p-2 border border-gray-300 rounded-md"
-                    required
-                />
-            </label>
+        {/* Campo phone */}
+        <div className="mb-4">
+        <label className="block text-sm font-bold mb-2">
+            Phone:
+            <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 text-lg leading-tight focus:outline-none focus:shadow-outline"
+                type='phone'
+                name="phone"
+                value={formData.phone.toString()}
+                onChange={handlePhoneChange}
+            />
+        </label>
+        </div>
+        {/* Campo links */}
+            <div className="mb-4">
+        <label className="block text-sm font-bold mb-2">
+            Links:
+            <textarea
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 text-lg leading-tight focus:outline-none focus:shadow-outline"
+                name="links"
+                value={formData.links.join(", ")}
+                onChange={(e) => setFormData({ ...formData, links: e.target.value.split(", ") })}
+            />
+        </label>
+        </div>
 
-            <label className="block text-left">
-                <span className="text-gray-200 text-[12px]">Descripción del servicio:</span>
-                <textarea
-                    name="keyWords"
-                    onChange={(e) => setFormData({ ...formData, keyWords: e.target.value.split(",").map(k => k.trim())})}
-                    className="block w-full p-2 border border-gray-300 rounded-md"
-                />
-            </label>
-
-            <label className="block text-left">
-                <span className="text-gray-200 text-[12px]">Links:</span>
-                <textarea
-                    name="links"
-                    value={formData.links
-                        .filter((link) => link.startsWith("Link:"))
-                        .map((link) => link.replace("Link: ", ""))
-                        .join(", ")}
-                    onChange={handleLinkSocialChange}
-                    className="block w-full p-2 border border-gray-300 rounded-md"
-                />
-            </label>
-
-            <label className="block text-left">
-                <span className="text-gray-200 text-[12px]">Social Networks:</span>
-                <textarea
-                    name="social"
-                    value={formData.links
-                        .filter((link) => link.startsWith("Social:"))
-                        .map((link) => link.replace("Social: ", ""))
-                        .join(", ")}
-                    onChange={handleLinkSocialChange}
-                    placeholder='www.linkedin.com/in/bob-marley'
-                    className="block w-full p-2 border border-gray-300 rounded-md"
-                />
-            </label>
-
-            <label className="block text-left">
-                <span className="text-gray-200 text-[12px]">Email:</span>
-                <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="block w-full p-2 border border-gray-300 rounded-md"
-                    required
-                />
-            </label>
-
-            <label className="block text-left">
-                <span className="text-gray-200 text-[12px]">Phone: (Optional)</span>
-                <span className="phone w-[50px] text-black font-semibold bg-white block w-full p-2 border border-gray-300 rounded-md flex items-center">
-                    <span className='flex items-center justify-center'> + </span>
-                    <input
-                        type="phone"
-                        name="phone"
-                        value={formData.phone.toString()}
-                        onChange={handlePhoneChange}
-                        className="font-normal ml-2 bg-[#2e2d2dad]"
-                    />
-                </span>
-            </label>
-
-            <label className="block text-left ">
-                <span className="text-gray-200 text-[12px]">Photo (max 1.5 MB):</span>
-                <input type="file" accept="image/*" onChange={handleFileChange} className=" block w-full  text-[15px] " />
-                {photoError && <p className="text-red-500 text-sm">{photoError}</p>}
-            </label>
-
-            <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300">
-                Submit
-            </button>
-        </form>
-    );
+        {/* Campo photo */}
+        <div className="mb-4 text-green-800">
+        <label className="block text-sm font-bold mb-2">
+            Photo (max 1.5 MB):
+            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-800 text-lg leading-tight focus:outline-none focus:shadow-outline" 
+            type="file" accept="image/*" onChange={handleFileChange} />
+            {photoError && <p style={{ color: "red" }}>{photoError}</p>}
+        </label>
+        <div className="flex flex-col items-center text-center mt-4">
+                {compressedPreviewUrl && (
+                    <>
+                        <h3>Vista previa de la imagen comprimida</h3>
+                        <img src={compressedPreviewUrl} alt="Vista previa comprimida" className="w-3/4 rounded-md mt-4"/>
+                    </>
+                )}   
+            </div>
+        </div>
+        <button className="font-bold mt-10 w-4/5 bg-green-300 text-green-800 rounded p-2 shadow-lg hover:scale-105" type="submit">Create card</button>
+    </form>
+    </div>
+);
 };
 
 export default FormComponent;

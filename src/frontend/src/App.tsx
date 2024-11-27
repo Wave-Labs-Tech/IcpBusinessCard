@@ -88,7 +88,7 @@ function App() {
      
 
       {/* <div className="additional-info">Tarjetas Públicas</div> */}
-      <div className="bg-stone-100 text-green-600 font-bold text-xl m-auto mt-12 mb-4 py-2 px-20 rounded-md shadow-2xl">
+      <div className="bg-stone-100 text-green-600 font-bold text-xl m-auto mt-20 mb-4 py-2 px-20 rounded-md shadow-2xl">
         Tarjetas Públicas</div>
 
       {/* Carrusel de tarjetas */}
@@ -103,6 +103,8 @@ function App() {
       </div>
       {isAuthenticated ? (
         <div className="flex flex-col items-center place-content-center mt-24">
+          {/* <p className="text-gray-400 text-green-200 text-3xl font-bold mb-8">This is your Smart Card</p> */}
+          <p className="bg-stone-100 text-green-600 font-bold text-xl m-auto mt-20 mb-4 py-2 px-20 rounded-md shadow-2xl">Tu Smart Card</p>
           <UserProfile />
           <hr className="w-3/5 border-t-2 border-green-600 mt-12" />
             <p className="w-fit text-green-600 font-bold bg-stone-100 mt-8 mb-4 py-1 px-20 rounded-md shadow-2xl">

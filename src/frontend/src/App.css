@@ -15,7 +15,8 @@
 
 .App-footer,
 .App-header {
-  background-color: #011830ce;
+  /* background-color: #011830ce; */
+  background-color: #263726d5;
   color: #ead8b1;
   min-height: 30px;
   padding: 10px;
