@@ -3,7 +3,7 @@
 @tailwind utilities;
 .App {
   background-color: #c0dbee;
-  background-image: url('./assetes/background.webp');
+  background-image: url('./assets/background.webp');
   background-size: cover;
   text-align: center;
   min-height: 100vh; /* Asegura que la altura mínima de la App ocupe toda la pantalla */

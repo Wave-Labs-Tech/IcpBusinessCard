@@ -48,16 +48,10 @@ export function UserProfile() {
     <div>
       {isAuthenticated && (
         <div>
-          {cardData ? (
-            <div className='md:flex md:text-[12px] justify-left mt-1 text-left text-[11px]'>
-              <p className='mx-2'>{cardData.name}</p>
-              <p className='mx-2'>{cardData.email}</p>
-              <p className='mx-2'>{cardData.owner.toString()}</p>
-            </div>
-          ) : (
+          {!cardData  && (
             <div>
               <button onClick={openFormModal} className="bg-blue-600 mt-3 text-white py-2 px-4 rounded">
-                Create Card
+                Create your Card
               </button>
               <FormModal
                 isOpen={isFormModalOpen}

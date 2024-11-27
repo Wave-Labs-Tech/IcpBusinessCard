@@ -2,20 +2,7 @@ import React, { useState, ChangeEvent, FormEvent, useContext } from 'react';
 import 'react-phone-input-2/lib/style.css';
 import { AuthContext } from "../../context/AuthContext"
 import { resizeImage } from "../../utils/imageUtils";
-
-type Text = string;
-type Nat = bigint;
-
-type FormData = {
-    name: Text;
-    email: Text;
-    phone: Nat;
-    photo: Uint8Array | null;
-    photoPreview: Uint8Array | null;
-    profession: Text;
-    skills: Text[];
-    links: Text[];
-};
+import { CardDataInit } from '../../declarations/backend/backend.did';
 
 interface FormComponentProps {
     onSubmit: () => void;
@@ -24,14 +11,14 @@ interface FormComponentProps {
 const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
     const { backend, updateCardDataUser } = useContext(AuthContext);
 
-    const [formData, setFormData] = useState<FormData>({
+    const [formData, setFormData] = useState<CardDataInit>({
         name: "",
         email: "",
         phone: BigInt(0),
-        photo: null,
-        photoPreview: null,
+        photo: [],
+        photoPreview: [],
         profession: "",
-        skills: [],
+        keyWords: [],
         links: []
     });
 
@@ -45,24 +32,16 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
-            if (file.size > 1.5 * 1024 * 1024) {
-                setPhotoError("El tamaño de la foto no debe superar los 1.5 MB"); // Se puede redimensionar directamente
-            } else {
-                try {
-                    const photo = new Uint8Array(await file.arrayBuffer());
-                    let resizeFile = await resizeImage(file, 50);
-                    let thumnailPhoto = new Uint8Array(await resizeFile.arrayBuffer());
-                    setFormData({
-                        ...formData,
-                        photo: photo,
-                        photoPreview: thumnailPhoto,
-                    });
-                    setPhotoError(null);
-                } catch (error) {
-                    console.error("Error al procesar el archivo:", error);
-                    setPhotoError("Error al procesar el archivo.");
-                }
-            }
+            let resizeFile = await resizeImage(file, 100);
+            let resizeThumbnail = await resizeImage(file, 5);
+            const photo = new Uint8Array(await resizeFile.arrayBuffer());
+            let thumnailPhoto = new Uint8Array(await resizeThumbnail.arrayBuffer());
+            setFormData({
+                ...formData,
+                photo: photo,
+                photoPreview: thumnailPhoto,
+            });
+            setPhotoError(null);
         }
     };
 
@@ -82,16 +61,11 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
         };
         if (backend) {
             try {
-                const result = await backend.whoAmI(); // Reemplaza `someFunction` con tu método
-                console.log("From FormComponnet: backend.whoAmI():", result);
                 let resultCreateCard = await backend.createCard(dataToSend);
                 if("Ok" in resultCreateCard){
                    updateCardDataUser(resultCreateCard.Ok) 
                 }
-                
-                console.log("FormComponnet: ", resultCreateCard);
-                // console.log("From FormComponent createCard(): ", resultCreateCard);
-                // console.log("From FormComponent createCard(): ", await backend.getMyCard());
+
             } catch (error) {
                 console.error("From FormComponnet: Error al llamar a backend.whoAmI() ", error);
             };
@@ -150,9 +124,8 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
             <label className="block text-left">
                 <span className="text-gray-200 text-[12px]">Descripción del servicio:</span>
                 <textarea
-                    name="skills"
-                    // value={formData.skills.join(", ")}
-                    onChange={(e) => setFormData({ ...formData, skills: e.target.value.split(", ") })}
+                    name="keyWords"
+                    onChange={(e) => setFormData({ ...formData, keyWords: e.target.value.split(",").map(k => k.trim())})}
                     className="block w-full p-2 border border-gray-300 rounded-md"
                 />
             </label>

@@ -73,6 +73,7 @@ const UserAvatarMenu: React.FC = () => {
                     <ul className="space-y-4">
                         <li className="hover:text-green-500 cursor-pointer" onClick={handleLoadImage}>Cambiar Imagen</li>
                         <li className="hover:text-green-500 cursor-pointer" onClick={handleOpenCardDetails}>Mi Perfil</li>
+                        <li className="hover:text-green-500 cursor-pointer" >Solicitudes</li>
                         <li className="hover:text-green-500 cursor-pointer" onClick={handleShowPrincipal}>Mis Datos</li>
                         <li className="hover:text-green-500 cursor-pointer">Mis Contactos</li>
                         <li className="hover:text-green-500 cursor-pointer">Mis Interacciones</li>

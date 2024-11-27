@@ -2,6 +2,10 @@ import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { uint8ArrayToBase64 } from "../utils/imageProcess";
 import { CompleteCardData } from "../declarations/backend/backend.did";
+// import SendMessageButton from './chat/SendMessageButton';
+import ConnectButton from './ConnectButton';
+import CardEditButton from './CardEditButton';
+import { UserIcon } from '@heroicons/react/outline';
 // import { relative } from 'path';
 
 interface CardDetailsProps extends CompleteCardData {
@@ -16,6 +20,14 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
     const [showCertificatesPopup, setShowCertificatesPopup] = useState(false);
     const [connectButtom, setConnectButtom] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showAll, setShowAll] = useState(false);
+
+    const MAX_ITEMS = 4; // Número máximo de elementos a mostrar
+    const MAX_LENGTH = 30; // Longitud máxima de cada texto
+
+    const truncateText = (text: string, maxLength: number) => {
+        return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+    };
 
     useEffect(() => {
         if (dataCard.photo && dataCard.photo.length > 0) {
@@ -45,7 +57,7 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
 
     }, []);
 
-    const handleShareCard = async (e: React.MouseEvent) => {
+    const handleShareCard = async () => {
         setIsLoading(true); // Inicia el spinner
         try {
             let shareResponse = await backend.shareCard(dataCard.owner);
@@ -68,6 +80,9 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
             setIsLoading(false); // Detiene el spinner
         }
     };
+    const visibleSkills = showAll
+        ? dataCard.keyWords
+        : dataCard.keyWords.slice(0, MAX_ITEMS);
 
     if (!isOpen) return null;
 
@@ -80,14 +95,14 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
                 style={{ boxShadow: "0 0 18px 10px rgba(255, 255, 255, 0.4)" }}>
                 {/* Foto de perfil */}
                 <div className="w-full md:w-1/3 flex items-center justify-center mb-4 md:mb-0">
-                    {photoUrl ? (
+                    {(photoUrl && photoUrl.length > 512) ? (
                         <img
                             src={photoUrl}
                             alt=""
                             className="w-[200px] h-[200px] md:w-[350px] md:h-[400px] rounded-full object-cover"
                         />
                     ) : (
-                        <div className="w-[200px] h-[200px] md:w-[350px] md:h-[400px] rounded-full bg-gray-700" />
+                        <UserIcon className="w-[200px] h-[200px] md:w-[350px] md:h-[400px] rounded-full bg-gray-700" />
                     )}
                 </div>
 
@@ -108,13 +123,22 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
 
                     {/* Skills */}
                     <section className="mb-4 w-full text-left pl-3">
-                        <h3 className="text-md font-semibold text-green-400">Descripción de Servicio:</h3>
-                        <ul className="list-disc list-inside text-gray-300 pl-4">
-                            {dataCard.skills.map((skill, index) => (
-                                <li key={index}>{skill}</li>
-                            ))}
-                        </ul>
-                    </section>
+            {/* <h3 className="text-md font-semibold text-green-400">Descripción de Servicio:</h3> */}
+            <ul className="list-disc list-inside text-gray-300 pl-4">
+                {visibleSkills.map((skill, index) => (
+                    <li key={index}>{truncateText(skill, MAX_LENGTH)}</li>
+                ))}
+            </ul>
+            {/* Botón para alternar entre ver más/ver menos */}
+            {dataCard.keyWords.length > MAX_ITEMS && (
+                <button
+                    className="mt-2 text-green-400 hover:underline"
+                    onClick={() => setShowAll(!showAll)}
+                >
+                    {showAll ? "Ver menos" : "Ver más"}
+                </button>
+            )}
+        </section>
 
                     {/* Positions */}
                     {dataCard.positions.length > 0 && (
@@ -204,56 +228,17 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
                         </div>
                     </div>
                 )}
-                {/* {cardDataUser && (<button
-                    className="bg-green-500 text-gray-800 rounded-lg pl-1 pr-1"
-                    style={{
-                        boxShadow: "0 0 4px 1px rgba(255, 255, 255, 0.4)",
-                        alignSelf: "end",
-                        marginBottom: "10px",
-                        position: "relative", // Cambiar a absolute o fixed
-                        top: "10px",
-                        right: "10px"
-                    }}
-                    onClick={handleShareCard}
-                >
-                    Connect
-                </button>)} */}
+        
 
-                {cardDataUser && !("Self" in dataCard.relationWithCaller) && (
-                    <button
-                        className={`${"None" in dataCard.relationWithCaller
-                                ? "bg-green-500 text-gray-800 rounded-lg pl-1 pr-1 "
-                                : "bg-gray-500 text-white rounded-lg pl-1 pr-1 "
-                            } ${isLoading ? "h-0" : "h-30"} transition-opacity duration-300`
-                        }
-                        style={{
-                            alignSelf: "end",
-                            marginBottom: "10px",
-                            position: "relative",
-                            minWidth: "100px",
-                            // height: "30px",
-                            top: "10px",
-                            right: "10px"
-                        }}
-                        onClick={
-                            ("ContactRequester" in dataCard.relationWithCaller ||
-                                "None" in dataCard.relationWithCaller) ? handleShareCard : undefined}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <div className="spinner border-t-2 border-l-2 border-gray-200 w-12 h-12 rounded-full animate-spin"
-                                style={{
-                                    alignSelf: "end",
-                                    marginBottom: "10px",
-                                    position: "relative",
-                                    top: "-40px",
-                                    right: "-25px",
-                                    minWidth: "30px"
-                                }}></div>
-                        ) : connectButtom
-                        }
-
-                    </button>
+                {cardDataUser && (
+                    !("Self" in dataCard.relationWithCaller) ?
+                        (<ConnectButton
+                            isLoading={isLoading}
+                            connectButtonText={connectButtom}
+                            handleShareCard={("ContactRequester" in dataCard.relationWithCaller || "None" in dataCard.relationWithCaller) ? handleShareCard : () => {}}
+                            isDisabled={isLoading}
+                        />):
+                        <CardEditButton/>
                 )}
             </div>
         </div>

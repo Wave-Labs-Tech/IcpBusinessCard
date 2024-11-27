@@ -31,7 +31,7 @@ function App() {
       if ("Ok" in response) {
         const newCards = response.Ok.cardsPreview;
         setCards((prev) => [...prev, ...newCards]); // Añade las nuevas tarjetas al estado
-        setHasMore(response.Ok.thereIsMore);
+        setHasMore(response.Ok.hasMore);
       } else {
         console.error("Error:", response.Err);
       }

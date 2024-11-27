@@ -4,7 +4,7 @@ import React, { createContext, ReactNode, useEffect, useState } from 'react';
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent, Identity, AnonymousIdentity, ActorSubclass } from "@dfinity/agent";
 import { createActor } from "../declarations/backend";
-import { _SERVICE, CompleteCardData, Notification } from "../declarations/backend/backend.did";
+import { _SERVICE, CompleteCardData } from "../declarations/backend/backend.did";
 import ModalProviderSelect from '../components/auth/ModalProviderSelect';
 
 const canisterId = process.env.REACT_APP_DFX_NETWORK === 'ic'
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             agentOptions: { identity: new AnonymousIdentity(), host }
         })
     );
-    const [notifications, setNotifications] = useState<Notification[]|null>(null);
+    // const [notifications, setNotifications] = useState<Notification[]|null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false); // Estado para el modal
 
     useEffect(() => {
@@ -78,21 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         getUser()
     }, [isAuthenticated, backend] );
-
-    // useEffect( () => {
-    //     const getNotifications = async () => {
-    //         if(cardDataUser) {
-    //             let n = await backend.getMyNotifications();
-    //             if(n) { setNotifications(n) }
-    //             console.log(cardDataUser.name, n)
-    //         } else { 
-    //             setNotifications(null) 
-    //         }
-    //     };
-    //     console.log(notifications)
-    //     if (cardDataUser && !notifications){ getNotifications()}
-        
-    // }, [backend, cardDataUser, isAuthenticated, notifications]);
 
     async function init() {
         const authClient = await AuthClient.create();
