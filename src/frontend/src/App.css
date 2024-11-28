@@ -2,9 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 .App {
-  background-color: #c0dbee;
-  background-image: url('./assets/background.webp');
+  /* background-color: #c0dbee; */
+  /* background-image: url('./assets/background.webp'); */
+  background-image: url("./assets/Wave-Labs_Fondo.png");
   background-size: cover;
+  background-position: center;
+  overflow-x: hidden;
+  /* font-family: Zen Dots, monospace, Verdana, Geneva, Tahoma, sans-serif; */
   text-align: center;
   min-height: 100vh; /* Asegura que la altura mínima de la App ocupe toda la pantalla */
   display: flex;
@@ -12,9 +16,10 @@
   padding-bottom: 100px;
 }
 
-.App-footer, .App-header {
+.App-footer,
+.App-header {
   background-color: #011830ce;
-  color: #EAD8B1;
+  color: #ead8b1;
   min-height: 20px;
   padding: 0px 10px 0px 10px;
 }
@@ -26,9 +31,11 @@
 }
 
 .header-title {
-  color: #EAD8B1;
+  /* color: #ead8b1; */
+  color: #e4dfed;
   font-size: 2.5rem;
-  text-shadow: 3px 3px 6px #1cff14d5;
+  /* text-shadow: 3px 3px 6px #1cff14d5; */
+  text-shadow: 3px 3px 6px #9283a8d5;
   flex-grow: 1;
   text-align: center;
 }
@@ -86,12 +93,31 @@
 }
 
 .footer-links a {
-  color: rgb(226, 255, 193);
+  /* color: rgb(226, 255, 193); */
+  color: #e4dfed;
   text-decoration: none;
 }
 
 .footer-links a:hover {
   text-decoration: underline;
+}
+
+.App-header button {
+  font-size: 0.9rem;
+  background-color: #b8bdc7;
+  color: #011830ce;
+  box-shadow: none;
+  margin: 15px 2px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 12px 20px;
+}
+
+.App-header button:hover {
+  background-color: #a6acb9;
+  color: #011830ce;
+  box-shadow: none;
+  scale: 1.05;
 }
 
 /* Media query para dispositivos móviles */
@@ -102,7 +128,9 @@
   .footer-title {
     font-size: 0.8rem;
   }
-  .App-header button, .App-footer {
+
+  .App-header button,
+  .App-footer {
     font-size: 0.8rem;
     padding: 5px 10px;
   }
