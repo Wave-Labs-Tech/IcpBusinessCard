@@ -103,19 +103,19 @@
 }
 
 .App-header button {
-  font-size: 0.9rem;
-  background-color: #b8bdc7;
-  color: #011830ce;
+  font-size: 0.8rem;
+  background-color: #2563eb;
+  color: #e4dfed;
   box-shadow: none;
-  margin: 15px 2px;
+  /* margin: 15px 2px;
   margin-top: 5px;
   margin-bottom: 5px;
-  padding: 12px 20px;
+  padding: 10px 20px; */
 }
 
 .App-header button:hover {
-  background-color: #a6acb9;
-  color: #011830ce;
+  background-color: #2563eb;
+  color: #e4dfed;
   box-shadow: none;
   scale: 1.05;
 }

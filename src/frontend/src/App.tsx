@@ -81,7 +81,7 @@ function App() {
   }, [isAuthenticated, backend, whoAmI]);
 
   return (
-    <div className="App flex flex-col min-h-screen w-full">
+    <div className="App flex flex-col min-h-screen w-full" style={{backgroundColor: "black", opacity: 0.8}}>
       <Header/>
       {/* <NavBar/> */}
 
