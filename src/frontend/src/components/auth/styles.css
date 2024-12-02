@@ -2,7 +2,7 @@
     background-color: #2650aa; /* Color de fondo verde */
     color: white; /* Color del texto blanco */
     border: none; /* Sin borde */
-    padding: 10px 20px; /* Espaciado interno */
+    padding: 5px 0px; /* Espaciado interno */
     text-align: center; /* Centrar texto */
     text-decoration: none; /* Sin subrayado */
     display: inline-block; /* Mostrar como bloque en línea */
@@ -11,11 +11,13 @@
     cursor: pointer; /* Cambia el cursor al pasar el mouse */
     border-radius: 5px; /* Bordes redondeados */
     transition: background-color 0.3s; /* Transición suave */
-    box-shadow: 2px 2px 10px rgba(221, 137, 59, 0.568);
+    box-shadow: 2px 2px 10px rgba(221, 137, 59, 0.363);
+    min-width: 80px;
+
 }
 
 .button:hover {
-    box-shadow: 3px 3px 10px rgba(221, 218, 59, 0.945);
+    box-shadow: 3px 3px 10px rgba(221, 218, 59, 0.418);
     background-color: #4a79dd; /* Color de fondo al pasar el mouse */    
 }
 
@@ -52,4 +54,10 @@
     text-align: center;
     position: relative;
     
+}
+
+@media (max-width: 768px) { 
+    .button {
+        min-width: 50px;
+    }
 }

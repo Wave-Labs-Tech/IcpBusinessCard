@@ -50,7 +50,7 @@ export function UserProfile() {
         <div>
           {!cardData  && (
             <div>
-              <button onClick={openFormModal} className="bg-blue-600 mt-3 text-white py-2 px-4 rounded">
+              <button onClick={openFormModal} className="bg-blue-600 mt- text-white py-2 px-4 rounded ">
                 Create your Card
               </button>
               <FormModal

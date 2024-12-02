@@ -14,13 +14,13 @@ import ChatModalNotifications from "./chat/ChatModalNotifications";
 const filterNotifications = (n: Notification[]) => {
     return {
         msgsUw: n
-            .filter(notification => "Msg" in notification.kind) 
+            .filter(notification => "Msg" in notification.kind)
             .map(notification => ({
-                nameSender: "Msg" in notification.kind? notification.kind.Msg.nameSender: "",
-                sender: "Msg" in notification.kind?  notification.kind.Msg.sender: Principal.anonymous(),
-                chatId: "Msg" in notification.kind?  notification.kind.Msg.chatId: 0,
-        })), // Transformamos cada Msg a MsgInterface
-        notific: n.filter(notification => !("Msg" in notification.kind)), 
+                nameSender: "Msg" in notification.kind ? notification.kind.Msg.nameSender : "",
+                sender: "Msg" in notification.kind ? notification.kind.Msg.sender : Principal.anonymous(),
+                chatId: "Msg" in notification.kind ? notification.kind.Msg.chatId : 0,
+            })), // Transformamos cada Msg a MsgInterface
+        notific: n.filter(notification => !("Msg" in notification.kind)),
     };
 };
 
@@ -41,7 +41,7 @@ const Header: React.FC = () => {
     const [modalShowMsgs, setModalShowMsgs] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isCardSelected, setIsCardSelected] = useState(false);
-    const [selectedCard, setSelectedCard] = useState<CompleteCardData | null>( null );
+    const [selectedCard, setSelectedCard] = useState<CompleteCardData | null>(null);
     // const [selectedNotificationDate, setSelectedNotificationDate] = useState<bigint | null>(null);
 
 
@@ -49,7 +49,7 @@ const Header: React.FC = () => {
     const handleShowNotifications = async () => {
         setModalShowNotifications(true);
     }
-    const handleClose = () => { 
+    const handleClose = () => {
         setIsCardSelected(false)
     }
     const handleCloseChat = () => {
@@ -58,7 +58,7 @@ const Header: React.FC = () => {
 
     const handleShowMsgs = async () => {
         setModalShowMsgs(true);
-        
+
     }
 
     const closeNotificationsModal = () => {
@@ -66,23 +66,61 @@ const Header: React.FC = () => {
     };
 
     const removeNotification = (date: bigint) => {
-        setNotifications(notifications.filter((n) => n.date !== date)) 
+        setNotifications(notifications.filter((n) => n.date !== date))
         backend.removeNotification(date);
-          
+
     };
 
     const handelSelectedNotification = async (principal: Principal, date: bigint) => {
         // setIsLoading(true)
         closeNotificationsModal()
         removeNotification(date)
-        
-        const response = await backend.getCardByPrincipal(principal);  
-        if("Ok" in response){
+
+        const response = await backend.getCardByPrincipal(principal);
+        if ("Ok" in response) {
             setSelectedCard(response.Ok)
             setIsCardSelected(true)
         }
-        // setIsLoading(false)   
+        // setIsLoading(false)
+    };
+
+    const handleSelectMsg = async (msg: MsgInterface) => {
+        console.log("Mensage de " + msg.nameSender)
+        handleCloseChat()
     }
+
+    useEffect(() => {
+        const handleKeyDown = async (event: KeyboardEvent) => {
+            // Detecta la combinación de teclas (por ejemplo, "Ctrl + N")
+            if (event.ctrlKey && event.key === 'e') {
+                event.preventDefault(); // Evita el comportamiento predeterminado
+
+                if (isAuthenticated && backend) {
+                    try {
+                        const newNotifications = await backend.getMyNotifications();
+                        if (newNotifications.length > 0) {
+                            const { msgsUw, notific } = filterNotifications(newNotifications);
+                            setNotifications(notific);
+                            setMsgsUnwraped(msgsUw);
+                        }
+                    } catch (error) {
+                        console.error("Error al obtener notificaciones:", error);
+                    } finally {
+                        // ();
+                    }
+                }
+            }
+        };
+
+        // Escucha los eventos de teclado
+        window.addEventListener('keydown', handleKeyDown);
+
+        // Limpia el listener cuando el componente se desmonta
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [backend, isAuthenticated, notifications, msgsUnwraped]);
+
 
     useEffect(() => {
         const getNotifications = async () => {
@@ -93,7 +131,7 @@ const Header: React.FC = () => {
                     // console.log(n)
                     if (n.length > 0) {
                         // let {msg, notific} = filterNotifications(n); // separamos las notificaciones de los mensages
-                        let {msgsUw, notific} = filterNotifications(n);
+                        let { msgsUw, notific } = filterNotifications(n);
                         // console.log("hola")
                         setNotifications(notific);
                         setMsgsUnwraped(msgsUw)
@@ -131,42 +169,44 @@ const Header: React.FC = () => {
             <div className="w-8 h-8 flex items-center justify-center mr-[.5vw] md:h-8 md:w-8 text-gray-400 cursor-pointer
                 transition-transform duration-100 transform hover:scale-110 hover:text-gray-300"
                 onClick={() => {
-                        if (msgsUnwraped.length > 0) {handleShowMsgs()} 
-                      }
-                    }
+                    if (msgsUnwraped.length > 0) { handleShowMsgs() }
+                }
+                }
             >
                 {cardDataUser?.photo && (msgsUnwraped.length > 0) && <div className="absolute top-30 z-50 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
                     style={{ transform: 'translate(50%, -50%)' }}
                 >
                     {msgsUnwraped.length}
                 </div>}
-                <ChatIcon/>
+                <ChatIcon />
             </div>
 
-            <div translate="no" className="header-title"
-            > <img src="" alt="" />
-                Smart Network Card</div>
+            <div translate="no" className="header-title flex justify-center">
+                <img className="md:h-12 h-5 md:mr-5 mr-2" style={{alignSelf: "center"}} src="./logo.svg" alt=""/>
+                
+                <div>Smart Network Card</div>
+            </div>
 
-            <div className="relative  flex items-center justify-center mr-[3vw] md:h-8 md:w- h-8 w-8 text-gray-400 cursor-pointer 
+            <div className="relative  flex items-center justify-center mr-[3vw] md:h-8 h-8 w-8 text-gray-400 cursor-pointer 
                     transition-transform duration-100 transform hover:scale-110 hover:text-gray-300"
-                    onClick={() => {
-                        if (notifications.length > 0) {handleShowNotifications()} 
-                      }
-                    }
+                onClick={() => {
+                    if (notifications.length > 0) { handleShowNotifications() }
+                }
+                }
             >
                 {cardDataUser?.photo && (notifications.length > 0) && <div className="absolute top-30 z-50 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
                     style={{ transform: 'translate(50%, -50%)' }}
                 >
                     {notifications.length}
                 </div>}
-                <BellIcon/>
+                <BellIcon />
             </div>
             <div className="md:w-[100px] h-[70px] flex items-center justify-center ml-[5px]" style={{ minWidth: "50px" }}>
                 {isLoading ? (
                     <div className="spinner border-t-2 border-l-2 border-gray-200 w-8 h-8 rounded-full animate-spin"></div>
                 ) : !isAuthenticated ? (
                     <LoginButton />
-                ) : cardDataUser ?  <UserAvatarMenu />  :  <LogoutButton /> }
+                ) : cardDataUser ? <UserAvatarMenu /> : <LogoutButton />}
             </div>
             {showModalNotifications && <NotificationModal
                 notifications={notifications}
@@ -174,7 +214,7 @@ const Header: React.FC = () => {
                 onSelect={handelSelectedNotification}
             />}
 
-            {isCardSelected && selectedCard &&(<CardDetails {...selectedCard}
+            {isCardSelected && selectedCard && (<CardDetails {...selectedCard}
                 isOpen={isCardSelected}
                 onClose={handleClose}
             />)}
@@ -183,11 +223,11 @@ const Header: React.FC = () => {
                     nameSender: msg.nameSender,
                     sender: msg.sender,
                     chatId: msg.chatId,
-                    })
+                })
                 )}
-                onSelectMessage={(Msg) => {}}
+                onSelectMessage={handleSelectMsg}
                 onClose={handleCloseChat}
-                
+
             />)}
 
         </header>

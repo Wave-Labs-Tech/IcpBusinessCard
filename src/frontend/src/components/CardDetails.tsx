@@ -2,12 +2,10 @@ import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { uint8ArrayToBase64 } from "../utils/imageProcess";
 import { CompleteCardData } from "../declarations/backend/backend.did";
-// import SendMessageButton from './chat/SendMessageButton';
 import ConnectButton from './ConnectButton';
 import CardEditButton from './CardEditButton';
 import { UserIcon } from '@heroicons/react/outline';
-// import { relative } from 'path';
-
+ 
 interface CardDetailsProps extends CompleteCardData {
     isOpen: boolean;
     onClose: () => void;
@@ -55,7 +53,7 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
             }
         }
 
-    }, []);
+    }, [dataCard]);
 
     const handleShareCard = async () => {
         setIsLoading(true); // Inicia el spinner
@@ -80,6 +78,7 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
             setIsLoading(false); // Detiene el spinner
         }
     };
+
     const visibleSkills = showAll
         ? dataCard.keyWords
         : dataCard.keyWords.slice(0, MAX_ITEMS);
@@ -233,9 +232,11 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
                 {cardDataUser && (
                     !("Self" in dataCard.relationWithCaller) ?
                         (<ConnectButton
+                            updateTextButton={(_) => {setConnectButtom(_)}}
                             isLoading={isLoading}
                             connectButtonText={connectButtom}
                             handleShareCard={("ContactRequester" in dataCard.relationWithCaller || "None" in dataCard.relationWithCaller) ? handleShareCard : () => {}}
+                            principal={dataCard.owner}
                             isDisabled={isLoading}
                         />):
                         <CardEditButton/>

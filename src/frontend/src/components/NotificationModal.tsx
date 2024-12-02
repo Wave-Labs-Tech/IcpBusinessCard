@@ -43,7 +43,7 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ notifications, on
                     className="flex"
                     onClick={() => onSelect((notification.kind as { ContactAccepted: User }).ContactAccepted.principal, notification.date)}
                   >
-                    <PlusIcon className="h-5 mr-3" />
+                    <UserAddIcon className="h-5 mr-3" />
                     <div>
                       {notification.kind.ContactAccepted.name} ... aceptó tu solicitud de contacto!
                     </div>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="210mm" height="210mm" version="1.1" viewBox="0 0 146.63 127.96" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-18.801 -110.5)">
+  <g transform="scale(1.1 1.1) translate(15 49.5)" stroke="#00ffbfc2">
+   <path transform="matrix(.26458 0 0 .26458 18.085 -5.7789)" d="m182.15 344.4-67.076 39.345-67.612-38.417-0.53609-77.762 67.076-39.345 67.612 38.417z" fill-opacity="0" stroke-linejoin="round" stroke-width="19.143"/>
+   <g fill="none" stroke-width="5.065">
+    <path d="m66.278 85.343 17.889 10.164 17.747-10.41-0.14184-20.574-17.889-10.164"/>
+    <path d="m48.531 95.753 0.14184 20.574 17.889 10.164 17.747-10.41"/>
+    <ellipse cx="90.265" cy="112.33" rx="5.0643" ry="5.1576"/>
+    <ellipse cx="77.763" cy="50.651" rx="5.0643" ry="5.1576"/>
+   </g>
+  </g>
+  <text transform="scale(.97376 1.0269)" x="59.278973" y="226.15088" fill="#000000" font-family="sans-serif" font-size="30px" font-weight="bold" stroke-width=".26458" style="line-height:1.25" xml:space="preserve"><tspan x="59.278973" y="216.15088" fill="#cccccc" font-family="sans-serif" font-size="30px" font-weight="bold" stroke-width=".26458">SNC</tspan></text>
+  <text transform="scale(.92878 1.0767)" x="25.844799" y="225.88898" font-family="sans-serif" font-size="14px" stroke-width=".26458" style="line-height:1.25" xml:space="preserve"><tspan x="20" y="218.88898" fill="#cccccc" font-family="sans-serif" font-size="12px" font-weight="bold" stroke-width=".26458">Smart Network Card</tspan></text>
+ </g>
+</svg>

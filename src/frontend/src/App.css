@@ -3,13 +3,14 @@
 @tailwind utilities;
 .App {
   background-color: #c0dbee;
-  background-image: url('./assets/background.webp');
+  /* background-image: url('./assets/background.webp'); */
+  background-image: url('./assets/background2.png');
   background-size: cover;
   text-align: center;
-  min-height: 100vh; /* Asegura que la altura mínima de la App ocupe toda la pantalla */
+  min-height: 100vh; 
   display: flex;
   flex-direction: column;
-  padding-bottom: 100px;
+  /* padding-bottom: 100px; */
 }
 
 .App-footer, .App-header {
@@ -26,15 +27,24 @@
 }
 
 .header-title {
-  color: #EAD8B1;
+  color: #00ffbfc2;
   font-size: 2.5rem;
-  text-shadow: 3px 3px 6px #1cff14d5;
+  /* text-shadow: 3px 3px 6px #000000f6; */
   flex-grow: 1;
   text-align: center;
 }
 
 .additional-info {
+  color: #000000;
+  background-color: #00ffbfc2;
+  
+  display: flex;
+  justify-self: center;
+  border-radius: 40px;
+  align-self: center;
+  width: auto;
   margin-top: 50px;
+  padding: 0px 15px 0px 15px ;
   font-size: 2rem;
   text-align: center;
 }

@@ -1,5 +1,5 @@
 /* eslint-disable array-callback-return */
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useContext, useEffect, useCallback, ChangeEvent } from 'react';
 import './App.css';
 import Header from './components/Header';
 import { UserProfile } from './components/userProfile/UserProfile';
@@ -17,12 +17,17 @@ function App() {
   const [hasMore, setHasMore] = useState(true);  // Estado para controlar si hay más tarjetas para cargar
   const [initialLoad, setInitialLoad] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CompleteCardData | null>(null);
+  const [opacity, setOpacity] = useState<number>(0.65);
 
   let canisterId: string | undefined = process.env.REACT_APP_CANISTER_ID_BACKEND;
 
   if (!canisterId) {
     throw new Error("El canister ID no está definido.");
   }
+
+  const handleSliderChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    setOpacity(Number(event.target.value) / 100); // Normalizamos el valor entre 0 y 1
+  };
 
   // Llama a getPaginatePublicCards y actualiza las tarjetas y el indicador de "hasMore"
   const getPaginatePublicCards = useCallback(async (index: number) => {
@@ -81,41 +86,75 @@ function App() {
   }, [isAuthenticated, backend, whoAmI]);
 
   return (
-    <div className="App flex flex-col min-h-screen w-full">
-      <Header/>
-      {/* <NavBar/> */}
+    <div className="App flex flex-col min-h-screen w-full relative">
+  {/* Capa semitransparente */}
+  <div
+    className="absolute inset-0 bg-black"
+    style={{ opacity }}
+  ></div>
 
-      {isAuthenticated ? ( !cardDataUser &&
+  <div className="relative flex flex-col min-h-screen w-full select-none">
+    <Header />
+    {/* <NavBar /> */}
+
+    {isAuthenticated ? (
+      !cardDataUser && (
         <div>
           <UserProfile />
         </div>
-      ) : null}
-      {selectedCard ? (
-        <CardDetails {...selectedCard}
-          isOpen={true}
-          onClose={handleBackToCarousel}
-        />
-      ) :
-        (<div>
-          {cards.length > 0 && (<div className="additional-info">Tarjetas Públicas</div>)}
-          <div className="flex justify-center mt-4">
-            <CardCarousel
-              cards={cards}
-              fetchCards={getPaginatePublicCards}
-              hasMore={hasMore}
-              onCardClick={handleCardClick}
-            />
-          </div>
+      )
+    ) : null}
 
-        </div>)}
-        
-      <footer className="App-footer">
-        <ul className="footer-links md:h-[35px] ">
-          <li><a href="https://wave-labs.tech/">Wave Labs Tech Web Site</a></li>
-        </ul>
-      </footer>
-    </div>
+    {selectedCard ? (
+      <CardDetails
+        {...selectedCard}
+        isOpen={true}
+        onClose={handleBackToCarousel}
+      />
+    ) : (
+      <div>
+        {cards.length > 0 && (
+          <div className="additional-info">Public Cards</div>
+        )}
+        <div className="flex justify-center mt-4">
+          <CardCarousel
+            cards={cards}
+            fetchCards={getPaginatePublicCards}
+            hasMore={hasMore}
+            onCardClick={handleCardClick}
+          />
+        </div>
+      </div>
+    )}
+
+    <footer className="App-footer relative z-10">
+      <ul className="footer-links md:h-[35px]">
+        <li translate="no">
+          <a href="https://wave-labs.tech/" target="blank">
+            Wave Labs Tech Web Site
+          </a>
+        </li>
+      </ul>
+    </footer>
+  </div>
+
+  {/* Slider para controlar la opacidad */}
+  <div className="fixed bottom-[80px] left-[50%] transform -translate-x-1/2 z-10 flex items-center gap-4">
+    <span className="text-yellow-500 text-xs">☀️</span>
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value={opacity * 100}
+      onChange={handleSliderChange}
+      className="w-64 h-1 bg-gray-500 rounded-lg appearance-none"
+    />
+    <span className="text-blue-500 text-xs">🌙</span>
+  </div>
+</div>
+
   );
-}
+};
+
 
 export default App;

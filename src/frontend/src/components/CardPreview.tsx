@@ -33,16 +33,19 @@ const CardPreview: React.FC<CardPreviewProps> = ({card}) => {
     }, [card.photoPreview]);
 
     return (
-        <button type="button" className="transition-transform duration-300 transform hover:scale-105">
-            <div className="bg-gray-800 shadow-lg rounded-lg p-4 m-2 flex flex-col items-center w-60 h-80 border border-gray-700 hover:border-green-500 transition-colors duration-300">
+        <button type="button" className="transition-transform duration-300 transform hover:scale-105 z-20">
+            
+            
+            <div className="bg-[#303040] shadow-lg rounded-lg p-4 m-2 flex flex-col items-center w-60 h-80 border 
+             border-teal-400 hover:border-blue-600 transition-colors duration-300">
                 {(photoUrl &&( photoUrl.length > 512)) ? (
-                    <img src={photoUrl} alt={`${card.name} preview`} className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-green-500 shadow-md" />
+                    <img src={photoUrl} alt={`${card.name}`} className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-teal-400" />
                 ) : (
-                    <UserIcon className="h-24 h-24 mb-2 border-2 border-green-800 rounded-full bg-gray-700 text-gray-500"/>
+                    <UserIcon className="h-24 h-24 mb-2 border-2 border-blue-800 rounded-full bg-gray-700 text-gray-500"/>
                     // <div className="w-24 h-24 bg-gray-700 rounded-full mb-4 border-2 border-gray-600" />
                 )}
-                <h3 className="text-lg font-semibold text-green-300">{card.name}</h3>
-                <p className="text-sm text-gray-400">{card.profession}</p>
+                <h3 className="text-lg font-semibold text-gray-100">{card.name}</h3>
+                <p className="text-sm text-gray-200">{card.profession}</p>
                 <div className="mt-2">
                     {/* <h4 className="text-xs font-semibold text-green-400">Descripción de Servicio:</h4> */}
                     <ul className="text-xs text-gray-300 list-disc list-inside text-left">

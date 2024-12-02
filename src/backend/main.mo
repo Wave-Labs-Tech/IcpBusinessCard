@@ -141,19 +141,40 @@ shared ({ caller }) actor class BusinessCard () = this {
         true
     };
 
+    public shared ({ caller }) func deleteMyCard(): async {#Ok: CardPublicData; #Err: Text}{
+        deleteCard(caller)
+    };
+
+    func deleteCard(user: Principal): {#Ok: CardPublicData; #Err: Text} {
+        let card = Map.remove<Principal, Card>(cards, phash, user);
+        ignore Set.remove<Principal>(publicCards, phash, user);
+        ignore Map.remove<Principal, [Notification]>(notifications, phash, user);
+        switch card {
+            case null { #Err("User not have a Card") };
+            case ( ?card ) { 
+                let contactsUser = Set.toArray(card.contacts);
+                for (contact in contactsUser.vals()){
+                    let cttCard = Map.get<Principal, Card>(cards, phash, contact);
+                    switch cttCard {
+                        case ( ?cttCard ) {
+                            let contactsCtt = cttCard.contacts;
+                            Set.delete<Principal>(contactsCtt, phash, user);
+                            ignore Map.put<Principal, Card>(cards, phash, contact, {cttCard with contacts = contactsCtt});
+                            let contactRequestsCtt = cttCard.contactRequests;
+                            Set.delete<Principal>(contactRequestsCtt, phash, user);
+                            ignore Map.put<Principal, Card>(cards, phash, contact, {cttCard with contactRequests = contactRequestsCtt});
+                        };
+                        case _ { }
+                    }
+                };
+                #Ok({card with relationWithCaller = #None; contactQty = Set.size(card.contacts)})
+            }
+        } 
+    };
+
     public shared ({ caller }) func removeCardByPrincipal({user: Principal}): async {#Ok: CardPublicData; #Err: Text} {
         assert(isAdmin(caller));
-        let card = Map.remove<Principal, Card>(cards, phash, user);
-        switch card {
-            case null {
-                #Err("User not have a Card");
-            };
-            case (?card) {
-                ignore Set.remove<Principal>(publicCards, phash, user);
-                // TODO Limpieza extra garbage collector(p: Principal) solo mantener historial de interacciones con otros usuarios
-                #Ok({card with relationWithCaller = #None; contactQty = Set.size(card.contacts)});
-            }
-        }
+        deleteCard(user)
     };
   
   ///////////////////////////// Create elements and setters funcions //////////////////////////
@@ -626,10 +647,6 @@ shared ({ caller }) actor class BusinessCard () = this {
                             ignore Set.remove<Principal>(callerCard.contactRequests, phash, p);
 
                             ///// Push Notification //////////
-                            // let notification: Notification = #ContactAccepted({
-                            //     date = now();
-                            //     acceptor = {name = callerCard.name; principal = caller}
-                            // });
                             let notification: Notification = {
                                 date = now();
                                 kind = #ContactAccepted({principal = caller; name = callerCard.name})
@@ -639,10 +656,6 @@ shared ({ caller }) actor class BusinessCard () = this {
                         } else {
                             ignore Set.put<Principal>(pCard.contactRequests, phash, caller);
                             ///// Push Notification //////////
-                            // let notification: Notification = #ContactRequest({
-                            //     date = now();
-                            //     requester = {name = callerCard.name; principal = caller}
-                            // });
                             let notification: Notification = {
                                 date = now();
                                 kind = #ContactRequest({principal = caller; name = callerCard.name})
@@ -657,4 +670,21 @@ shared ({ caller }) actor class BusinessCard () = this {
         }
     };
 
+    public shared ({ caller }) func disconnectCard(p: Principal): async {#Ok: Types.Relation; #Err: Text}{
+        let cCard = Map.get<Principal, Card>(cards, phash, caller);
+        switch cCard {
+            case null {#Err("There is no card associated with the caller")};
+            case ( ?cCard ){
+                let pCard = Map.get<Principal, Card>(cards, phash, p);
+                switch pCard {
+                    case null {#Err("There is no card associated with the Principal provided")};
+                    case ( ?pCard ) {
+                        Set.delete<Principal>(pCard.contacts, phash, caller);
+                        Set.delete<Principal>(cCard.contacts, phash, p);
+                        #Ok(#None)
+                    }
+                }
+            }
+        }
+    };
 };

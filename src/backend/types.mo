@@ -169,7 +169,7 @@ module {
     };
 
     public type UpdatableData = {
-        pofession: Text;
+        profession: Text;
         keyWords: [Text];
         bio: Text;
         sector: [Sector];

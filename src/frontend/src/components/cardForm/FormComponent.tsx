@@ -32,8 +32,8 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit }) => {
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
-            let resizeFile = await resizeImage(file, 100);
-            let resizeThumbnail = await resizeImage(file, 5);
+            let resizeFile = await resizeImage(file, 512);
+            let resizeThumbnail = await resizeImage(file, 25);
             const photo = new Uint8Array(await resizeFile.arrayBuffer());
             let thumnailPhoto = new Uint8Array(await resizeThumbnail.arrayBuffer());
             setFormData({

@@ -1,0 +1,92 @@
+(
+  variant {
+    Ok = record {
+      cardsPreview = vec {
+        record {
+          keyWords = vec { "Solidity"; "ICP"; "Motoko"; "C++"; "Java" };
+          owner = principal "xrcbf-os42w-2pu6u-7xhrl-iv2o4-lqdi5-utz7p-e2kyu-ltaw6-iytij-qae";
+          name = "Ariel Gustavo Robotti ";
+          profession = "Blockchain Backend Developer";
+          certificates = vec {};
+          positions = vec {};
+        };
+        record {
+          keyWords = vec {};
+          owner = principal "tu5r5-jklee-e5i55-j4veg-hqtno-24rg3-y3hyg-jg3mw-yogtp-lns4p-6qe";
+          name = "Kolia Krasotkin";
+          profession = "Alumno";
+          certificates = vec {};
+          positions = vec {};
+        };
+        record {
+          keyWords = vec { "DFX CLI"; "Motoko"; "software architecture" };
+          owner = principal "epvyw-ddnza-4wy4p-joxft-ciutt-s7pji-cfxm3-khwlb-x2tb7-uo7tc-xae";
+          name = "Ariel DFX CLI";
+          profession = "Beta tester de consola";
+          certificates = vec {};
+          positions = vec {};
+          photoPreview = blob "00/11/22/33/44";
+        };
+        record {
+          keyWords = vec {
+            "Vocal couch";
+            "Personal vocal trainer";
+            "Técnica especializada en potenciar las cualidades de cada persona";
+            "Apreciación musical";
+            "Interpretación";
+            "Expresión del ser a través de la música";
+            "Desarrollo de los sentidos y canalización de los sentimientos a través de la voz";
+            "";
+          };
+          owner = principal "pefup-tzxru-c232w-ptfri-3wehm-ypn64-kgcmw-ekk4v-sa7oo-kwwi7-vae";
+          name = "Rosario Natalia Lucero";
+          profession = "Profesora de Canto ";
+          certificates = vec {};
+          positions = vec {};
+        };
+        record {
+          keyWords = vec {
+            "Consultoría con especialidad en Diseño de estrategia transformación digital";
+            "con especialidad en arquitectura de datos";
+            "implementación de IA";
+            "Blockchain e IoT.";
+          };
+          owner = principal "fqkbu-nnjek-ifm7t-al2ns-kufhz-ov2fx-rxust-gnzuf-a4rzh-45a7q-cqe";
+          name = "Jaime Contreras";
+          profession = "Gerente TI | Transformación Digital | Estrategia de Datos | Business Intelligence | Big Data | Líder de Equipos|Blockchain Professional Certificate";
+          certificates = vec {};
+          positions = vec {};
+        };
+        record {
+          keyWords = vec {
+            "Integración del equipo de prospección con la fuerza de ventas\nComunicación constante en el agendamiento de citas\nReuniones de status continuas\nGeneración de leads calificados altamente rentables";
+          };
+          owner = principal "yeaqm-zr24w-3uvg4-pqg5t-ogn32-cu57b-5dzh4-csm3r-dpkh2-fcldd-hae";
+          name = "Johanna Cardenas";
+          profession = "Marketing";
+          certificates = vec {};
+          positions = vec {};
+        };
+        record {
+          keyWords = vec {
+            "Blockchain\nProcesos de transformación digital\nRPA\nInteligencia de negocios";
+          };
+          owner = principal "jipzi-573ti-ja6qk-jkna4-j2egb-tpv6j-i2o6c-3lt3i-dnsdm-pgp5b-zae";
+          name = "Pablo Guzmán Sánchez";
+          profession = "CEO";
+          certificates = vec {};
+          positions = vec {};
+        };
+        record {
+          keyWords = vec { "Solidity"; "Java"; "Foundry"; "React"; "Angular" };
+          owner = principal "g5sfy-hycua-24hxx-e7wqi-ax7qn-vjbjz-yddwx-6prwy-rdxbc-xqkvj-lqe";
+          name = "Juan Fuente";
+          profession = "Desarrollador blockchain fullstack";
+          certificates = vec {};
+          positions = vec {};
+        };
+      };
+      hasMore = false;
+    }
+  },
+)

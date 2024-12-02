@@ -1,6 +1,5 @@
 import React from "react";
 import { Principal } from "@dfinity/principal";
-import { Mail } from '@heroicons/react/outline';
 import { MailIcon } from "@heroicons/react/outline";
 
 interface Msg {
@@ -30,7 +29,6 @@ const ChatModalNotification: React.FC<ChatNotificationProps> = ({ msgs, onClose,
                             >
                                 <div className="flex items-center">
                                     <MailIcon className="h-5 w-5 mr-5"></MailIcon>
-                                    
                                     <div>
                                         <p className="font-bold">{msg.nameSender} Te ha enviado un mensaje</p>
                                         {/* <p className="text-sm text-gray-400">ID de chat: {msg.chatId}</p> */}
