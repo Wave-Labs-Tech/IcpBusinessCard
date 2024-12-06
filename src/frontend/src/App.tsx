@@ -114,7 +114,7 @@ function App() {
     ) : (
       <div>
         {cards.length > 0 && (
-          <div className="additional-info">Public Cards</div>
+          <div className="additional-info" style={{padding: "0 2vw 0 2vw", width: "fit-content", margin: "1.5vh auto"}}>Public Cards</div>
         )}
         <div className="flex justify-center mt-4">
           <CardCarousel
@@ -139,8 +139,8 @@ function App() {
   </div>
 
   {/* Slider para controlar la opacidad */}
-  <div className="fixed bottom-[80px] left-[50%] transform -translate-x-1/2 z-10 flex items-center gap-4">
-    <span className="text-yellow-500 text-xs">☀️</span>
+  <div className=" fixed bottom-[80px] left-[50%] transform -translate-x-1/2 z-10 flex items-center gap-4">
+    <span  translate="no" className="text-yellow-500 text-xs select-none">☀️</span>
     <input
       type="range"
       min="0"
@@ -149,7 +149,7 @@ function App() {
       onChange={handleSliderChange}
       className="w-64 h-1 bg-gray-500 rounded-lg appearance-none"
     />
-    <span className="text-blue-500 text-xs">🌙</span>
+    <span className="text-blue-500 text-xs select-none">🌙</span>
   </div>
 </div>
 

@@ -20,9 +20,10 @@ target/
 node_modules/
 dist/
 .svelte-kit/
+.docs/
 
 # environment variables
 .env
 
 .mops
-.docs
+
