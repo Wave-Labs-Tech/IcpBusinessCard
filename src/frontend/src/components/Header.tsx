@@ -10,6 +10,7 @@ import { BellIcon, ChatIcon } from '@heroicons/react/outline';
 import { Notification, CompleteCardData } from "../declarations/backend/backend.did";
 import NotificationModal from "./NotificationModal";
 import ChatModalNotifications from "./chat/ChatModalNotifications";
+import BinanceTicker from "../components/BinanceTicker"
 
 const filterNotifications = (n: Notification[]) => {
     return {
@@ -182,9 +183,13 @@ const Header: React.FC = () => {
             </div>
 
             <div translate="no" className="header-title flex justify-center">
-                <img className="md:h-12 h-5 md:mr-5 mr-2" style={{alignSelf: "center"}} src="./logo.svg" alt=""/>
-                
+                <img className="md:h-12 h-5 md:mr-5 mr-2" style={{ alignSelf: "center" }} src="./logo.svg" alt="" />
+
                 <div>Smart Network Card</div>
+            </div>
+
+            <div className="flex items-center md:static fixed top-[60px]   bg-transparent justify-center md:justify-end py-2 md:py-0 z-50 md:z-auto">
+                <BinanceTicker />
             </div>
 
             <div className="relative  flex items-center justify-center mr-[3vw] md:h-8 h-8 w-8 text-gray-400 cursor-pointer 
