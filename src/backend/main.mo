@@ -601,13 +601,13 @@ shared ({ caller }) actor class BusinessCard () = this {
         };  
     };
 
-    public shared ({ caller }) func pushNotificationFromChatCanister(n: Notification, users: [Principal]): async {#Ok; #Err}{
-        assert(caller == Principal.fromActor(chatManager));
-        for (user in users.vals()){
-            pushNotification(n, user);
-        };
-        #Ok
-    };
+    // public shared ({ caller }) func pushNotificationFromChatCanister(n: Notification, users: [Principal]): async {#Ok; #Err}{
+    //     assert(caller == Principal.fromActor(chatManager));
+    //     for (user in users.vals()){
+    //         pushNotification(n, user);
+    //     };
+    //     #Ok
+    // };
 
     public shared query ({ caller }) func getMyNotifications(): async [Notification]{
         getNotificationsByPrincipal(caller)

@@ -6,7 +6,7 @@ import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Principal "mo:base/Principal";
 import Types "types";
-import GlobalTypes  "../types";
+// import GlobalTypes  "../types";
 import { now } "mo:base/Time";
 
 shared ({ caller }) actor class ChatManager() = this {
@@ -15,16 +15,17 @@ shared ({ caller }) actor class ChatManager() = this {
     type Chat = Types.Chat;
     type MsgContent = Types.MsgContent;
     type Msg = Types.Msg;
-    type Notification = GlobalTypes.Notification;
+    type ChatNotification = Types.ChatNotification;
   ////////////////////////// Variables generales ///////////////////////////////////
 
     // let users = Set.new<Principal>();
     let userNames = Map.new<Principal, Text>(); 
     stable let DEPLOYER = caller;
     stable let chats = Map.new<ChatId, Chat>();
-    stable let CANISTER_MAIN = actor(Principal.toText(DEPLOYER)):  actor {
-        pushNotificationFromChatCanister: shared (Notification, [Principal]) -> async {#Ok; #Err};
-    };
+    stable let userNotifications = Map.new<Principal, [ChatNotification]>();
+    // stable let CANISTER_MAIN = actor(Principal.toText(DEPLOYER)):  actor {
+    //     pushNotificationFromChatCanister: shared (ChatNotification, [Principal]) -> async {#Ok; #Err};
+    // };
 
   ////////////////////// Main canister comunications ///////////////////////////////
     
@@ -35,25 +36,21 @@ shared ({ caller }) actor class ChatManager() = this {
 
     public shared ({ caller }) func addUser(u: Principal, name: Text) {
         assert (caller == DEPLOYER);
-        // ignore Set.put<Principal>(users, phash, u);
         ignore Map.put<Principal, Text>(userNames, phash, u, name)
     };
 
     public shared ({ caller }) func removeUser(u: Principal) {
         assert (caller == DEPLOYER);
-        // Set.delete<Principal>(users, phash, u);
         Map.delete<Principal, Text>(userNames, phash, u);
     };
     
     public shared ({ caller }) func iAmUser(): async Bool{
-        // Set.has<Principal>(users, phash, caller);
         Map.has<Principal, Text>(userNames, phash, caller);
     };
 
   ///////////////////////////// Private functions //////////////////////////
 
     func isUser(p: Principal): Bool {
-        // Set.has<Principal>(users, phash, p);
         Map.has<Principal, Text>(userNames, phash, p)
     };
 
@@ -121,13 +118,30 @@ shared ({ caller }) actor class ChatManager() = this {
                     )
                 };
 
-                ignore await CANISTER_MAIN.pushNotificationFromChatCanister(notification, _users);
+                // ignore await CANISTER_MAIN.pushNotificationFromChatCanister(notification, _users);
                 #Ok(chatId)
             }
-        };
-
-        
+        };   
     };
+
+    func getNotificationsByPrincipal(caller: Principal): [ChatNotification] {
+        switch (Map.get<Principal, [ChatNotification]>(userNotifications, phash, caller)) {
+            case null { [] };
+            case (?notifications ) { notifications }    
+        }
+    };
+
+    public shared query ({ caller }) func getMyNotifications(): async [ChatNotification]{
+        assert(isUser(caller));
+        return getNotificationsByPrincipal(caller);
+    };
+
+    public shared ({ caller }) func removeNotification(date: Int): async (){
+        let arrayNotifications = getNotificationsByPrincipal(caller);
+        let updateNotifications = Array.filter<ChatNotification>(arrayNotifications, func n = n.date != date);
+        ignore Map.put<Principal, [ChatNotification]>(userNotifications, phash, caller, updateNotifications)       
+    };
+
 
     public shared ({ caller }) func readChat(id: ChatId): async {#Ok: Chat; #Err}{
         assert(isUser(caller));
