@@ -1,9 +1,9 @@
 import React, { useState, ChangeEvent, FormEvent, useContext, useRef } from 'react';
 import 'react-phone-input-2/lib/style.css';
 import { AuthContext } from "../../context/AuthContext"
-import { resizeImage } from "../../utils/imageUtils";
+import { compressAndConvertImage } from '../../utils/imageManager';
 import { CardDataInit } from '../../declarations/backend/backend.did';
-import { UserIcon } from '@heroicons/react/outline';
+import { UserIcon, XIcon } from '@heroicons/react/outline';
 import PhonePrefixSelector from '../PhonePrefixSelector';
 
 interface FormComponentProps {
@@ -39,22 +39,21 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit, onClose }) => {
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
         if (file) {
-            let resizeFile = await resizeImage(file, 512);
-            let resizeThumbnail = await resizeImage(file, 25);
-            const photo = new Uint8Array(await resizeFile.arrayBuffer());
-            let thumnailPhoto = new Uint8Array(await resizeThumbnail.arrayBuffer());
+            let photo = await compressAndConvertImage(file, 700, 800, 800 );
+            let photoPreview = await compressAndConvertImage(file, 20);
+            
             setFormData({
                 ...formData,
-                photo: photo,
-                photoPreview: thumnailPhoto,
+                photo,
+                photoPreview,
             });
+            
             setPhoto(<img src={URL.createObjectURL(file)} alt="Uploaded" className="object-cover w-full h-full" />);
             setPhotoError(null);
         }
     };
 
     const handleCountrySelect = (value: string) => {
-        console.log(value)
         setCountryCode(value);
     }
 
@@ -64,14 +63,12 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit, onClose }) => {
             setPhone(phoneValue);
             setFormData({ ...formData, phone :BigInt(countryCode + phoneValue)});
         }
-        console.log(countryCode + phoneValue)
     };
 
     const handleFormSubmit = async (e: FormEvent) => {
         e.preventDefault();
         const validPhoto = formData.photo || new Uint8Array();
         const validPhotoPreview = formData.photoPreview || new Uint8Array();
-        console.log(Math.log10(Number(formData.phone)) > 8)
         const dataToSend = {
             ...formData,
             phone: Math.log10(Number(formData.phone)) > 8? formData.phone : BigInt(0),
@@ -98,14 +95,12 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit, onClose }) => {
     const handleLinkSocialChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
-        // Separar valores de Links y Social Networks
         const linksArray = name === "links" ? value.split(",").map((link) => `Link: ${link.trim()}`) :
             formData.links.filter(link => link.startsWith("Link:"));
 
         const socialArray = name === "social" ? value.split(",").map((social) => `Social: ${social.trim()}`) :
             formData.links.filter(link => link.startsWith("Social:"));
 
-        // Actualizar formData con ambos arrays combinados
         setFormData((prevData) => ({
             ...prevData,
             links: [...linksArray, ...socialArray],
@@ -121,12 +116,12 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit, onClose }) => {
                         className="text-gray-400 hover:text-white text-xl font-bold"
                         onClick={onClose}
                     >
-                        X</button>
+                        <XIcon className="w-6 h-6" />
+                    </button>
                 </div>
             </div>
 
             <div className="flex items-center gap-4">
-                {/* Foto */}
                 <div
                     className="relative w-[90px] h-[90px] sm:w-[140px] sm:h-[140px] cursor-pointer rounded-full border-2 border-gray-400 bg-gray-600 flex items-center justify-center flex-shrink-0"
                     onClick={() => fileInputRef.current?.click()}
@@ -144,7 +139,6 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit, onClose }) => {
                     </div>
                 </div>
 
-                {/* Name + Phone */}
                 <div className="flex flex-col flex-grow gap-2">
                     <label className="block text-left">
                         <span className="text-gray-200 text-[12px]">Name:</span>
@@ -174,34 +168,6 @@ const FormComponent: React.FC<FormComponentProps> = ({ onSubmit, onClose }) => {
                             </div>
                         </label>
                         </div>
-
-                    {/* <label className="block text-left">
-                        <span className="text-gray-200 text-[12px]">Phone: (Optional)</span>
-                        <span className="phone w-[50px] text-black font-semibold bg-white block w-full p-2 border border-gray-300 rounded-md flex items-center">
-                            <span className='flex items-center justify-center'> + </span>
-                            <input
-                                type="phone"
-                                name="phone"
-                                value={formData.phone.toString()}
-                                onChange={handlePhoneChange}
-                                className="font-normal ml-2 bg-[#2e2d2dad]"
-                            />
-                        </span>
-                    </label>  */}
-
-                    {/* <label className="block text-left">
-                        <span className="text-gray-200 text-[12px]">Phone: (Optional)</span>
-                        <span className="flex items-center w-full p-2 border border-gray-300 rounded-md bg-white text-black font-semibold">
-                            <span className='flex items-center justify-center'>+</span>
-                            <input
-                                type="phone"
-                                name="phone"
-                                value={formData.phone.toString()}
-                                onChange={handlePhoneChange}
-                                className="ml-2 flex-grow bg-[#2e2d2dad] font-normal"
-                            />
-                        </span>
-                    </label> */}
                 </div>
             </div>
 

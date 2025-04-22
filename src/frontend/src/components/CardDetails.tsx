@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { uint8ArrayToBase64 } from "../utils/imageProcess";
 import { CompleteCardData } from "../declarations/backend/backend.did";
 import ConnectButton from './ConnectButton';
 import CardEditButton from './CardEditButton';
-import { UserIcon } from '@heroicons/react/outline';
- 
+import { UserIcon, XIcon } from '@heroicons/react/outline';
+import { compressAndConvertImage, uint8ArrayToBase64} from '../utils/imageManager';
+
 interface CardDetailsProps extends CompleteCardData {
     isOpen: boolean;
     onClose: () => void;
@@ -19,6 +19,7 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
     const [connectButtom, setConnectButtom] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [showAll, setShowAll] = useState(false);
+    const [expandImage, setExpandImage] = useState(false)
 
     const MAX_ITEMS = 4; // Número máximo de elementos a mostrar
     const MAX_LENGTH = 30; // Longitud máxima de cada texto
@@ -55,22 +56,47 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
 
     }, [dataCard]);
 
+    const handleUploadImage = async () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            if (target.files && target.files[0]) {
+                const file = target.files[0];
+                console.log('Archivo seleccionado:', file);
+                const photoPreview = await compressAndConvertImage(file, 20)
+                const photo = await compressAndConvertImage(file, 700, 800, 800)
+                const base64Image = "data:image/png;base64," + uint8ArrayToBase64(photo);
+                setPhotoUrl(base64Image)
+                //TODO convertir a blob
+                const response = await backend.changePhoto({photo, photoPreview});
+                console.log(response);
+            }
+        };
+        input.click();
+    };
+
+    const handleViewImage = (url: string) => {
+        setExpandImage(true);
+    };
+
     const handleShareCard = async () => {
         setIsLoading(true); // Inicia el spinner
         try {
             let shareResponse = await backend.shareCard(dataCard.owner);
-            if("Ok" in shareResponse){
-                if("Contact" in shareResponse.Ok) {
+            if ("Ok" in shareResponse) {
+                if ("Contact" in shareResponse.Ok) {
                     setConnectButtom("Connected")
                 } else if ("ContactRequester" in shareResponse.Ok) {
-                    
+
                     setConnectButtom("Pending")
                 }
                 console.log(connectButtom)
                 console.log(shareResponse.Ok)
-            } else if("Err" in shareResponse){
+            } else if ("Err" in shareResponse) {
                 console.log(shareResponse.Err)
-                
+
             }
         } catch (error) {
             console.error("Error al compartir la tarjeta:", error);
@@ -93,7 +119,18 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
                 onClick={(e) => e.stopPropagation()}
                 style={{ boxShadow: "0 0 18px 10px rgba(255, 255, 255, 0.4)" }}>
                 {/* Foto de perfil */}
-                <div className="w-full md:w-1/3 flex items-center justify-center mb-4 md:mb-0">
+                <div
+                    className="w-full md:w-1/3 flex items-center justify-center mb-4 md:mb-0"
+                    onClick={() => {
+                        if ("Self" in dataCard.relationWithCaller) {
+                            // cargar imagen nueva
+                            handleUploadImage();
+                        } else {
+                            // ver imagen grande
+                            handleViewImage(photoUrl);
+                        }
+                    }}
+                >
                     {(photoUrl && photoUrl.length > 512) ? (
                         <img
                             src={photoUrl}
@@ -122,22 +159,22 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
 
                     {/* Skills */}
                     <section className="mb-4 w-full text-left pl-3">
-            {/* <h3 className="text-md font-semibold text-green-400">Descripción de Servicio:</h3> */}
-            <ul className="list-disc list-inside text-gray-300 pl-4">
-                {visibleSkills.map((skill, index) => (
-                    <li key={index}>{truncateText(skill, MAX_LENGTH)}</li>
-                ))}
-            </ul>
-            {/* Botón para alternar entre ver más/ver menos */}
-            {dataCard.keyWords.length > MAX_ITEMS && (
-                <button
-                    className="mt-2 text-green-400 hover:underline"
-                    onClick={() => setShowAll(!showAll)}
-                >
-                    {showAll ? "Ver menos" : "Ver más"}
-                </button>
-            )}
-        </section>
+                        {/* <h3 className="text-md font-semibold text-green-400">Descripción de Servicio:</h3> */}
+                        <ul className="list-disc list-inside text-gray-300 pl-4">
+                            {visibleSkills.map((skill, index) => (
+                                <li key={index}>{truncateText(skill, MAX_LENGTH)}</li>
+                            ))}
+                        </ul>
+                        {/* Botón para alternar entre ver más/ver menos */}
+                        {dataCard.keyWords.length > MAX_ITEMS && (
+                            <button
+                                className="mt-2 text-green-400 hover:underline"
+                                onClick={() => setShowAll(!showAll)}
+                            >
+                                {showAll ? "Ver menos" : "Ver más"}
+                            </button>
+                        )}
+                    </section>
 
                     {/* Positions */}
                     {dataCard.positions.length > 0 && (
@@ -227,21 +264,40 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
                         </div>
                     </div>
                 )}
-        
+
 
                 {cardDataUser && (
                     !("Self" in dataCard.relationWithCaller) ?
                         (<ConnectButton
-                            updateTextButton={(_) => {setConnectButtom(_)}}
+                            updateTextButton={(_) => { setConnectButtom(_) }}
                             isLoading={isLoading}
                             connectButtonText={connectButtom}
-                            handleShareCard={("ContactRequester" in dataCard.relationWithCaller || "None" in dataCard.relationWithCaller) ? handleShareCard : () => {}}
+                            handleShareCard={("ContactRequester" in dataCard.relationWithCaller || "None" in dataCard.relationWithCaller) ? handleShareCard : () => { }}
                             principal={dataCard.owner}
                             isDisabled={isLoading}
-                        />):
-                        <CardEditButton/>
+                        />) :
+                        <CardEditButton />
                 )}
             </div>
+
+            {expandImage && (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+                    <div className="relative">
+                        <button
+                            onClick={() => setExpandImage(false)}
+                            className="absolute top-2 right-2 text-white bg-gray-700 p-2 rounded-full hover:bg-gray-600"
+                        >
+                        <XIcon className="w-6 h-6" />
+                        {/* X */}
+                        </button>
+                        <img
+                        src={photoUrl}
+                        alt="Full view"
+                        className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
