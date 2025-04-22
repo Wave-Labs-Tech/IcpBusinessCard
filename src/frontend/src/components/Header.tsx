@@ -188,7 +188,7 @@ const Header: React.FC = () => {
                 <div>Smart Network Card</div>
             </div>
 
-            <div className="flex items-center md:static fixed top-[60px]   bg-transparent justify-center md:justify-end py-2 md:py-0 z-50 md:z-auto">
+            <div className="flex items-center lg:static fixed top-[70px] right-[-18px] mr-4 bg-transparent justify-center md:justify-end py-0 z-50">
                 <BinanceTicker />
             </div>
 

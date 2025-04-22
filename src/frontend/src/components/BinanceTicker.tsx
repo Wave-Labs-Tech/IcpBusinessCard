@@ -27,23 +27,24 @@ const BinanceTicker = () => {
   };
 
   return (
-    <div className="px-1 sm:px-2 py-1">
+    <div className="px-1 py-1">
       <div 
         onClick={handleOpenModal} 
         ref={buttonRef} 
-        className="cursor-pointer text-[#888888] p-0"
+        className="cursor-pointer text-[#888888] p-0 w-[160px]"
       >
         {price ? (
-          <div className="text-left bg-[#030310] p-2 rounded-xl 
-              w-[120] sm:w-[150px] text-sm text-[12px]:sm ">
-            <span className="text-white mr-1 sm:mr-3">{asset.toUpperCase()}</span>
+          <div className="text-left bg-[#030310] p-2 rounded-xl text-[16px]">
+            <span className="text-[#eaecef] mr-3">{asset.toUpperCase()}</span>
             <span className={colorPrice}>
               
               ${Number(price).toFixed(3)}
             </span>
           </div>
         ) : (
-          <div className="bg-[#030310] p-2 rounded-xl w-[100px] sm:w-[150px]">Loading...</div>
+          <div className="text-left bg-[#030310] p-2 rounded-xl text-[16px]">
+              Loading...
+          </div>
         )}
       </div>
 
@@ -51,9 +52,9 @@ const BinanceTicker = () => {
       {showModal && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowModal(false)} />
-          <div className="absolute bg-[#151520] p-4 rounded-xl w-[200px] shadow-lg" style={{ top: modalPos.top, left: modalPos.left }}>
+          <div className="absolute bg-[#151520] p-2 rounded-xl shadow-lg max-h-[60vh] overflow-y-auto w-[160px] custom-scrollbar"  style={{ top: modalPos.top, left: modalPos.left + 15}}>
             <div className="flex flex-col gap-y-2 mb-4">
-              {['btc', 'eth', 'icp', 'bnb', 'sol','xrp'].map((coin) => (
+              {['btc', 'eth', 'bnb', 'icp', 'sol','xrp', 'algo', 'avax', 'arb', 'xlm'].map((coin) => (
                 <button
                   key={coin}
                   onClick={() => updateAsset(coin)}
@@ -63,7 +64,6 @@ const BinanceTicker = () => {
                 </button>
               ))}
             </div>
-
             <input
               type="text"
               placeholder="dot"
@@ -75,7 +75,7 @@ const BinanceTicker = () => {
                   updateAsset(customAsset);
                 }
               }}
-              className="w-[80px] border border-gray-300 px-2 py-1 rounded mb-2"
+              className="w-[80px] text-center border border-gray-300 px-2 py-1 rounded mb-2"
             />
           </div>
         </div>

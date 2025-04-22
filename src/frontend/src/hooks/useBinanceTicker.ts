@@ -8,7 +8,7 @@ export const useBinanceTicker = (asset: string) => {
     const lastPricesRef = useRef<Record<string, number>>({});
 
     useEffect(() => {
-        // Cerrá el anterior si existía
+ 
         const oldSocket = wsRef.current;
         if (oldSocket && oldSocket.readyState === WebSocket.OPEN) {
           oldSocket.close();
@@ -34,7 +34,7 @@ export const useBinanceTicker = (asset: string) => {
             lastPricesRef.current[asset] = currentPrice;
       
             if (lastPrice !== null && currentPrice !== lastPrice) {
-              setColorPrice(currentPrice > lastPrice ? "text-green-500" : "text-red-500");
+              setColorPrice(currentPrice > lastPrice ? "text-[#0ECB81]" : "text-[#F6465D]");
             }
       
             lastPriceRef.current = currentPrice;

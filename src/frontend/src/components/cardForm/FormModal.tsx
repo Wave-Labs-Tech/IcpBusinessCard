@@ -15,7 +15,7 @@ const FormModal: React.FC<FormModalProps> = ({ isOpen, onClose, onSubmit }) => {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <FormComponent onSubmit={onSubmit} />
+                <FormComponent onSubmit={onSubmit} onClose={onClose} />
             </div>
         </div>
     );

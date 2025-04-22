@@ -86,7 +86,7 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60" onClick={onClose}>
             <div className="bg-gray-800 text-gray-100 p-4 rounded-[30px]  md:h-[420px] w-[82vw] h-[80vh] w-80% max-w-[800px]
                 mx-auto flex flex-col md:flex-row items-center md:items-start"
 
@@ -197,7 +197,7 @@ const CardDetails: React.FC<CardDetailsProps> = ({ isOpen, onClose, ...dataCard 
 
                 {/* Popup para Certificados */}
                 {showCertificatesPopup && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
                         <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-11/12 max-w-md">
                             <h3 className="text-lg font-semibold text-green-400 mb-4">Certificates</h3>
                             <ul className="text-gray-300 list-disc list-inside pl-4">

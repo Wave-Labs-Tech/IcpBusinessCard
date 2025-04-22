@@ -30,7 +30,7 @@ const CreateCard: React.FC<CreateCardProps> = ({ onFormSubmit }) => {
             {showForm && (
                 <div>
                     <h2>Create Your Business Card</h2>
-                    <FormComponent onSubmit={handleFormSubmit} /> {/* Pasamos handleFormSubmit como prop */}
+                    <FormComponent onSubmit={handleFormSubmit} onClose={() => setShowForm(false)} /> {/* Pasamos handleFormSubmit como prop */}
                 </div>
             )}
 

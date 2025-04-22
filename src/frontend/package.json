@@ -22,7 +22,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "deploy-ic": "dfx generate backend && sed -i '/REACT_APP_DFX_NETWORK/d' .env && echo 'REACT_APP_DFX_NETWORK=ic' >> .env && npm run build && dfx deploy --network ic",
+    "deploy-ic": "dfx generate backend && sed -i '/REACT_APP_DFX_NETWORK/d' .env && echo 'REACT_APP_DFX_NETWORK=ic' >> .env && npm run build && dfx deploy frontend --network ic",
     "deploy": "dfx generate backend && sed -i '/REACT_APP_DFX_NETWORK/d' .env && echo 'REACT_APP_DFX_NETWORK=local' >> .env && npm run build && dfx deploy",
     "start": "react-scripts start",
     "build": "react-scripts build",

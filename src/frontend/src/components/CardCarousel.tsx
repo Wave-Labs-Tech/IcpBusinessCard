@@ -65,7 +65,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore,
             <button
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
-                className= "p-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 z-10 hidden-on-mobile"
+                className= "text-[#999] hover:text-[#fff] p-2 disabled:opacity-50 z-10 hidden-on-mobile mr-6 "
             >
                 ◀
             </button>
@@ -91,7 +91,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ cards, fetchCards, hasMore,
             <button
                 onClick={handleNext}
                 disabled={currentIndex === cards.length - 1 && !hasMore}
-                className=" p-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 z-10 hidden-on-mobile"
+                className="text-[#999] hover:text-[#fff] p-2 disabled:opacity-50 z-10 hidden-on-mobile ml-8"
             >
                 ▶
             </button>
